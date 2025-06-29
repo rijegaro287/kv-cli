@@ -1,0 +1,9 @@
+
+value1=0:uint8_t
+value2=1:uint16_t
+value3=2:uint32_t
+value4=3:uint64_t
+value5="Hola 1":string
+value6=5.75:float
+value7=7:double
+value8=true:bool

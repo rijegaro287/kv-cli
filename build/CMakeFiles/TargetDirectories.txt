@@ -1,0 +1,3 @@
+/home/rijegaro/Documents/GitHub/kv-store/build/CMakeFiles/kv_store.dir
+/home/rijegaro/Documents/GitHub/kv-store/build/CMakeFiles/edit_cache.dir
+/home/rijegaro/Documents/GitHub/kv-store/build/CMakeFiles/rebuild_cache.dir
