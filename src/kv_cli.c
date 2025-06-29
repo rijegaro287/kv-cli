@@ -6,8 +6,7 @@ extern void start_cli() {
     return;
   }
 
-  db_t *current_db = db_list[0];
-  print_db(current_db);
+  print_db(db_list[0]);
 }
 
 extern int64_t open_db(uint8_t *db_path, uint8_t *storage_structure) {

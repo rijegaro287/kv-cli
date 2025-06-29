@@ -60,8 +60,33 @@ extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
   }
 }
 
+extern db_t *create_db(uint8_t *storage_structure) {
+  db_t *db_ptr = malloc(sizeof(db_t));
+  db_ptr->id = 0;
+  if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    db_ptr->storage = malloc(sizeof(list_t));
+    memset(db_ptr->storage, '\0', sizeof(list_t));
+  }
+  else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+    // db_ptr = malloc(sizeof hash_t)
+    printf("Unimplemented: Hash Table");
+    return NULL;
+  }
+  else {
+    perror("Error: Invalid storage structure");
+    return NULL;
+  }
+
+  if (db_ptr == NULL) {
+    perror("Error: Failed to allocated storage memory");
+    return NULL;
+  }
+
+  return db_ptr;
+}
+
 extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *storage_structure) {
-  FILE *db_file_ptr = fopen(file_path, "r+");
+  FILE *db_file_ptr = fopen(file_path, "r");
   if (db_file_ptr == NULL) {
     perror("Error: Failed to read the database file.\n");
     return -1;
@@ -95,30 +120,6 @@ extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *storage_struct
   }
 
   return 0;
-}
-
-extern db_t *create_db(uint8_t *storage_structure) {
-  db_t *db_ptr = malloc(sizeof(db_t));
-  db_ptr->id = 0;
-  if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    db_ptr->storage = malloc(sizeof(list_t));
-  }
-  else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    // db_ptr = malloc(sizeof hash_t)
-    printf("Unimplemented: Hash Table");
-    return NULL;
-  }
-  else {
-    perror("Error: Invalid storage structure");
-    return NULL;
-  }
-
-  if (db_ptr == NULL) {
-    perror("Error: Failed to allocated storage memory");
-    return NULL;
-  }
-
-  return db_ptr;
 }
 
 extern void print_db(db_t *db_ptr) {
