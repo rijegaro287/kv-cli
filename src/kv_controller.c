@@ -1,9 +1,11 @@
 #include "kv_controller.h"
 
-static void *create_db(uint8_t *storage_structure) {
-  void *db_ptr;
+static db_t *create_db(uint8_t *storage_structure) {
+  db_t *db_ptr = malloc(sizeof(db_t));
+  // void *db_ptr;
   if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    db_ptr = malloc(sizeof(list_t));
+    // db_ptr = malloc(sizeof(list_t));
+    db_ptr->storage = malloc(sizeof(list_t));
   }
   else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
@@ -23,10 +25,10 @@ static void *create_db(uint8_t *storage_structure) {
   return db_ptr;
 }
 
-extern db_entry_t *get_by_idx(void *db_ptr, uint64_t idx) {
+extern db_entry_t *get_by_idx(db_t *db_ptr, uint64_t idx) {
   db_entry_t *entry;
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    entry = list_get_by_idx((list_t*)db_ptr, idx);
+    entry = list_get_by_idx((list_t*)db_ptr->storage, idx);
     if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
@@ -43,10 +45,10 @@ extern db_entry_t *get_by_idx(void *db_ptr, uint64_t idx) {
   return entry;
 }
 
-extern db_entry_t *get_by_key(void *db_ptr, uint8_t *key) {
+extern db_entry_t *get_by_key(db_t *db_ptr, uint8_t *key) {
   db_entry_t *entry;
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    entry = list_get_by_key((list_t*)db_ptr, key);
+    entry = list_get_by_key((list_t*)db_ptr->storage, key);
     if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
@@ -64,9 +66,9 @@ extern db_entry_t *get_by_key(void *db_ptr, uint8_t *key) {
   return entry;
 }
 
-extern int64_t insert_entry(void *db_ptr, db_entry_t *entry_ptr) {
+extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    if (list_insert((list_t*)db_ptr, entry_ptr) < 0) {
+    if (list_insert((list_t*)db_ptr->storage, entry_ptr) < 0) {
       perror("Error: Failed to insert entry into list");
       return -1;
     }
@@ -83,14 +85,15 @@ extern int64_t insert_entry(void *db_ptr, db_entry_t *entry_ptr) {
   }
 }
 
-extern int64_t load_db(uint8_t *file_path, void *dest, uint8_t *storage_structure) {
+extern int64_t load_db(uint8_t *file_path, db_t *dest, uint8_t *storage_structure) {
   FILE *db_file_ptr = fopen(file_path, "r+");
   if (db_file_ptr == NULL) {
     perror("Error: Failed to read the database file.\n");
     return -1;
   }
 
-  void *db_ptr = create_db(storage_structure);
+  db_t *db_ptr = create_db(storage_structure);
+  // void *db_ptr = create_db(storage_structure);
   if (db_ptr == NULL) {
     perror("Error: Failed to create database pointer");
     return -1;
@@ -128,9 +131,9 @@ extern int64_t load_db(uint8_t *file_path, void *dest, uint8_t *storage_structur
   return 0;
 }
 
-extern void print_db(void *db_ptr) {
+extern void print_db(db_t *db_ptr) {
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    list_print((list_t*)db_ptr);
+    list_print((list_t*)db_ptr->storage);
   }
   else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
