@@ -132,21 +132,31 @@ extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value) 
 }
 
 extern void print_entry(db_entry_t *entry) {
-  uint64_t *value_ptr = entry->value_ptr;
+  void *value_ptr = entry->value_ptr;
   switch (entry->type) {
   case INT8_TYPE:
+    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint8_t*)value_ptr);
+    break;
   case INT16_TYPE:
+    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint16_t*)value_ptr);
+    break;
   case INT32_TYPE:
+    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint32_t*)value_ptr);
+    break;
   case INT64_TYPE:
+    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint64_t*)value_ptr);
+    break;
   case BOOL_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *value_ptr);
+    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(bool*)value_ptr);
     break;
   case FLOAT_TYPE:
+    printf("type: %d\nkey: %s\nvalue: %f\n", entry->type, entry->key, *(float*)value_ptr);
+    break;
   case DOUBLE_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %f\n", entry->type, entry->key, *value_ptr);
+    printf("type: %d\nkey: %s\nvalue: %f\n", entry->type, entry->key, *(double*)value_ptr);
     break;
   case STR_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %s\n", entry->type, entry->key, value_ptr);
+    printf("type: %d\nkey: %s\nvalue: %s\n", entry->type, entry->key, (uint8_t*)value_ptr);
     break;
   default:
     perror("Error: Invalid Data Type");

@@ -37,7 +37,6 @@ int main(int argc, char const *argv[]) {
     printf("==============================\n");
   }
 
-
   if (fclose(db_ptr) == EOF) {
     perror("Error: Failed to close the database file\n");
     return -1;
