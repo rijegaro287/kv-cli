@@ -5,6 +5,7 @@ project(kv_store C)
 
 set(HEADERS
   include/kv_parser.h
+  include/constants.h
 )
 
 set(SOURCES

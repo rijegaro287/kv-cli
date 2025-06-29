@@ -5,4 +5,5 @@ cd ./build
 cmake ..
 make
 
-./kv_store
+cd ..
+./build/kv_store

@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/kv_store.dir/link.d CMakeFiles/kv_store.dir/src/main.c.o CMakeFiles/kv_store.dir/src/parser/kv_parser.c.o -o kv_store
