@@ -1,30 +1,5 @@
 #include "kv_controller.h"
 
-static db_t *create_db(uint8_t *storage_structure) {
-  db_t *db_ptr = malloc(sizeof(db_t));
-  // void *db_ptr;
-  if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    // db_ptr = malloc(sizeof(list_t));
-    db_ptr->storage = malloc(sizeof(list_t));
-  }
-  else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    // db_ptr = malloc(sizeof hash_t)
-    printf("Unimplemented: Hash Table");
-    return NULL;
-  }
-  else {
-    perror("Error: Invalid storage structure");
-    return NULL;
-  }
-
-  if (db_ptr == NULL) {
-    perror("Error: Failed to allocated storage memory");
-    return NULL;
-  }
-
-  return db_ptr;
-}
-
 extern db_entry_t *get_by_idx(db_t *db_ptr, uint64_t idx) {
   db_entry_t *entry;
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
@@ -85,17 +60,10 @@ extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
   }
 }
 
-extern int64_t load_db(uint8_t *file_path, db_t *dest, uint8_t *storage_structure) {
+extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *storage_structure) {
   FILE *db_file_ptr = fopen(file_path, "r+");
   if (db_file_ptr == NULL) {
     perror("Error: Failed to read the database file.\n");
-    return -1;
-  }
-
-  db_t *db_ptr = create_db(storage_structure);
-  // void *db_ptr = create_db(storage_structure);
-  if (db_ptr == NULL) {
-    perror("Error: Failed to create database pointer");
     return -1;
   }
 
@@ -104,8 +72,8 @@ extern int64_t load_db(uint8_t *file_path, db_t *dest, uint8_t *storage_structur
     if (strcmp(line_buffer, "\n") == 0 || line_buffer[0] == '#') continue;  
     uint8_t *type, *key, *value;
     if ((type = strtok(line_buffer, TYPE_DELIMETER)) == NULL ||
-    (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
-    (value = strtok(NULL, VALUE_DELIMETER)) == NULL) {
+        (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
+        (value = strtok(NULL, VALUE_DELIMETER)) == NULL) {
       perror("Error: Failed to tokenize an entry");
       continue;
     }
@@ -121,14 +89,36 @@ extern int64_t load_db(uint8_t *file_path, db_t *dest, uint8_t *storage_structur
     }
   }
 
-  print_db(db_ptr);
-
   if (fclose(db_file_ptr) == EOF) {
     perror("Error: Failed to close the database file\n");
     return -1;
   }
 
   return 0;
+}
+
+extern db_t *create_db(uint8_t *storage_structure) {
+  db_t *db_ptr = malloc(sizeof(db_t));
+  db_ptr->id = 0;
+  if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    db_ptr->storage = malloc(sizeof(list_t));
+  }
+  else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+    // db_ptr = malloc(sizeof hash_t)
+    printf("Unimplemented: Hash Table");
+    return NULL;
+  }
+  else {
+    perror("Error: Invalid storage structure");
+    return NULL;
+  }
+
+  if (db_ptr == NULL) {
+    perror("Error: Failed to allocated storage memory");
+    return NULL;
+  }
+
+  return db_ptr;
 }
 
 extern void print_db(db_t *db_ptr) {

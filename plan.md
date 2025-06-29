@@ -37,6 +37,8 @@
 * Create the configurable data structure ✓
 * Load the database into the structure ✓
 * Add CLI Loop
+  * Ability to load more than one database into memory
+  * Switch between the loaded ones
 * Static Library
 * Add Tests framework
 
