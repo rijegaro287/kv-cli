@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "kv_controller.h"
+#include "kv_cli.h"
 
 int main(int argc, char const *argv[]) {
   void *db_ptr = malloc(sizeof(void));
@@ -9,6 +10,7 @@ int main(int argc, char const *argv[]) {
   }
 
   /* Run CLI Loop */
+  start_cli(db_ptr);
 
   return 0;
 }

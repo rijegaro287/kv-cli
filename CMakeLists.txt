@@ -7,14 +7,16 @@ set(HEADERS
   include/constants.h
   include/kv_parser.h
   include/kv_controller.h
+  include/kv_cli.h
   include/utilities/string_conversion.h
   include/utilities/linked_list.h
-)
-
-set(SOURCES
+  )
+  
+  set(SOURCES
   src/main.c
   src/kv_parser.c
   src/kv_controller.c
+  src/kv_cli.c
   src/utilities/string_conversion.c
   src/utilities/linked_list.c
 )

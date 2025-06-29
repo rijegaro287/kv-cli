@@ -99,8 +99,6 @@ extern int64_t load_db(uint8_t *file_path, void *dest, uint8_t *storage_structur
   uint8_t line_buffer[LINE_BUFFER_SIZE];
   while (fgets(line_buffer, LINE_BUFFER_SIZE, db_file_ptr) != NULL) {
     if (strcmp(line_buffer, "\n") == 0 || line_buffer[0] == '#') continue;  
-    printf("==============================\n");
-
     uint8_t *type, *key, *value;
     if ((type = strtok(line_buffer, TYPE_DELIMETER)) == NULL ||
     (key = strtok(NULL, KEY_DELIMETER)) == NULL ||

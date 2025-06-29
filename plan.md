@@ -22,7 +22,7 @@
 
 
 ## Steps
-* Configure CMake
+* Configure CMake ✓
 * Make a program that can read and write to .db files
   * Delimiters as constants ✓
   * Read:
@@ -34,8 +34,8 @@
     * Create a format string from an entry object
     * Decide how to perform updates
     * Implement atomic write
-* Create the configurable data structure
-* Load the database into the structure
+* Create the configurable data structure ✓
+* Load the database into the structure ✓
 * Add CLI Loop
 * Static Library
 * Add Tests framework
