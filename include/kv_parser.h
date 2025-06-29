@@ -13,7 +13,7 @@
 
 typedef struct _db_entry_t {
   int64_t type;
-  uint8_t *key;
+  uint8_t key[LINE_BUFFER_SIZE/2];
   void *value_ptr;
 } db_entry_t;
 

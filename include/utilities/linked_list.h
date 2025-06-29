@@ -21,7 +21,7 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry);
 
 extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx);
 
-extern db_entry_t *list_get_by_key(list_t* list, uint64_t idx);
+extern db_entry_t *list_get_by_key(list_t* list, uint8_t *idx);
 
 extern void list_update(list_t* list, db_entry_t *entry, uint64_t idx);
 

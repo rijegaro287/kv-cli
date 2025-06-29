@@ -13,14 +13,12 @@ extern list_t* create_list() {
 extern int64_t list_insert(list_t* list, db_entry_t *entry) {
   node_t* new_node = malloc(sizeof(node_t));
   if (new_node == NULL) {
-    perror("Error: Failed to allocated memory for a node.");
+    perror("Error: Failed to allocated memory for a node.\n");
     return -1;
   }
 
   new_node->entry = entry;
   new_node->next = NULL;
-
-  printf("**** key: %s\n", new_node->entry->key);
 
   if(list->head == NULL) {
     list->head = new_node;
@@ -43,7 +41,6 @@ extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
     printf("Index %d out of range for list", idx);
     return NULL;
   }
-  
   uint64_t current_idx = 0;
   node_t* current_node = list->head;
   while (current_node != NULL) {
@@ -53,6 +50,18 @@ extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
     current_idx++;
     current_node = current_node->next;
   }
+  return NULL;
+}
+
+extern db_entry_t *list_get_by_key(list_t* list, uint8_t *key) {
+  node_t* current_node = list->head;
+  while (current_node != NULL) {
+    if (strcmp(current_node->entry->key, key) == 0) {
+      return current_node->entry;
+    }
+    current_node = current_node->next;
+  }
+  return NULL;
 }
 
 // extern void list_update(list_t* list, db_entry_t *entry, uint64_t idx) {
@@ -118,6 +127,11 @@ extern void list_print(list_t* list) {
 
   for (uint64_t i = 0; i < list->size; i++) {
     db_entry_t *entry = list_get_by_idx(list, i);
+    if(entry == NULL) {
+      perror("Error: Entry not found");
+      return;
+    }
+
     print_entry(entry);
   }
 }

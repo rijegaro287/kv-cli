@@ -3,7 +3,6 @@
 static void *create_db(uint8_t *storage_structure) {
   void *db_ptr;
   if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    printf("linked list db pointer\n");
     db_ptr = malloc(sizeof(list_t));
   }
   else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
@@ -24,13 +23,14 @@ static void *create_db(uint8_t *storage_structure) {
   return db_ptr;
 }
 
-extern db_entry_t *get_entry_by_idx(void *db_ptr, uint64_t idx) {
+extern db_entry_t *get_by_idx(void *db_ptr, uint64_t idx) {
+  db_entry_t *entry;
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    if (list_get_by_idx((list_t*)db_ptr, idx) < 0) {
+    entry = list_get_by_idx((list_t*)db_ptr, idx);
+    if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
     }
-    return 0;
   }
   else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
@@ -40,15 +40,17 @@ extern db_entry_t *get_entry_by_idx(void *db_ptr, uint64_t idx) {
     perror("Error: Invalid storage structure");
     return NULL;
   }
+  return entry;
 }
 
-extern db_entry_t *get_entry_by_key(void *db_ptr, uint8_t *key) {
+extern db_entry_t *get_by_key(void *db_ptr, uint8_t *key) {
+  db_entry_t *entry;
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    // if (list_get((list_t*)db_ptr, key) < 0) {
-    //   perror("Error: Failed to insert entry into list");
-    //   return NULL;
-    // }
-    return 0;
+    entry = list_get_by_key((list_t*)db_ptr, key);
+    if (entry == NULL) {
+      perror("Error: Failed to insert entry into list");
+      return NULL;
+    }
   }
   else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
@@ -59,8 +61,8 @@ extern db_entry_t *get_entry_by_key(void *db_ptr, uint8_t *key) {
     perror("Error: Invalid storage structure");
     return NULL;
   }
+  return entry;
 }
-
 
 extern int64_t insert_entry(void *db_ptr, db_entry_t *entry_ptr) {
   if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
@@ -98,7 +100,7 @@ extern int64_t load_db(uint8_t *file_path, void *dest, uint8_t *storage_structur
   while (fgets(line_buffer, LINE_BUFFER_SIZE, db_file_ptr) != NULL) {
     if (strcmp(line_buffer, "\n") == 0 || line_buffer[0] == '#') continue;  
     printf("==============================\n");
-    
+
     uint8_t *type, *key, *value;
     if ((type = strtok(line_buffer, TYPE_DELIMETER)) == NULL ||
     (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
@@ -113,17 +115,12 @@ extern int64_t load_db(uint8_t *file_path, void *dest, uint8_t *storage_structur
       continue; 
     }
 
-    printf("**** prev value: %s, current value: %s\n", key, entry->key);
-
     if(insert_entry(db_ptr, entry) < 0) {
       perror("Error: Failed to insert entry into storage");
-      continue;
     }
-    
-    
   }
+
   print_db(db_ptr);
-  printf("==============================\n");
 
   if (fclose(db_file_ptr) == EOF) {
     perror("Error: Failed to close the database file\n");

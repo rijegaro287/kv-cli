@@ -25,3 +25,6 @@ target_include_directories(kv_store PRIVATE
   include/
   include/utilities
 )
+
+file(COPY "${CMAKE_SOURCE_DIR}/tests/data/test.db" 
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/tests/data/")

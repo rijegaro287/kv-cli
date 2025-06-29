@@ -1,8 +1,8 @@
-int64:value4=11221
-int32:value3=4121
-int16:value2=134
-int8:value1=12
-float:value6=5.75
-double:value7=7.12371237
-bool:value8=true
-string:value5="Hola 1"
+int64:key4=11221
+int32:key3=4121
+int16:key2=134
+int8:key1=12
+float:key6=5.75
+double:key7=7.12371237
+bool:key8=true
+string:key5="Hola 1"

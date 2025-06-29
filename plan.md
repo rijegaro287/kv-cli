@@ -38,6 +38,7 @@
 * Load the database into the structure
 * Add CLI Loop
 * Static Library
+* Add Tests framework
 
 ## Architecture
 

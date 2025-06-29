@@ -129,39 +129,38 @@ extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value) 
   }
   
   entry_ptr->type = map_data_type_str(type);
-  entry_ptr->key = key;
   entry_ptr->value_ptr = NULL;
+  strcpy(entry_ptr->key, key);
   set_entry_value(entry_ptr, value);
   return entry_ptr;
 }
 
 extern void print_entry(db_entry_t *entry) {
-  printf("**** key: %s\n", entry->key);
-  void *value_ptr = entry->value_ptr;
+  // void *value_ptr = entry->value_ptr;
   switch (entry->type) {
   case INT8_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint8_t*)value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint8_t*)entry->value_ptr);
     break;
   case INT16_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint16_t*)value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint16_t*)entry->value_ptr);
     break;
   case INT32_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint32_t*)value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint32_t*)entry->value_ptr);
     break;
   case INT64_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(uint64_t*)value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint64_t*)entry->value_ptr);
     break;
   case BOOL_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %d\n", entry->type, entry->key, *(bool*)value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(bool*)entry->value_ptr);
     break;
   case FLOAT_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %f\n", entry->type, entry->key, *(float*)value_ptr);
+    printf("type: %d, key: %s, value: %f\n", entry->type, entry->key, *(float*)entry->value_ptr);
     break;
   case DOUBLE_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %f\n", entry->type, entry->key, *(double*)value_ptr);
+    printf("type: %d, key: %s, value: %f\n", entry->type, entry->key, *(double*)entry->value_ptr);
     break;
   case STR_TYPE:
-    printf("type: %d\nkey: %s\nvalue: %s\n", entry->type, entry->key, (uint8_t*)value_ptr);
+    printf("type: %d, key: %s, value: %s\n", entry->type, entry->key, (uint8_t*)entry->value_ptr);
     break;
   default:
     perror("Error: Invalid Data Type");
