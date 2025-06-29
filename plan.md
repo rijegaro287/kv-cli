@@ -24,13 +24,18 @@
 ## Steps
 * Configure CMake
 * Make a program that can read and write to .db files
-* Read line by line
-* Parse each line into command key and value
-* Create and object from the parsed information
-* Load the object into the selected data structure
+  * Delimiters as constants ✓
+  * Read:
+    * Read line by line ✓
+    * Parse each line into command key and value ✓
+    * Create and object from the parsed information ✓
+    * Load the object into the selected data structure ✓
+  * Write:
+    * Create a format string from an entry object
+    * Decide how to perform updates
+    * Implement atomic write
 * Create the configurable data structure
-* Decide how to perform updates
-* Implement atomic write
+* Load the database into the structure
 * Add CLI Loop
 * Static Library
 
@@ -55,7 +60,9 @@ flowchart LR
   t1[.db file]
   t1@{ shape: text }
   t1 --> B[Parser]
-  B --> |Object| C[Data Structure]
+  B --> |Object| C[Controller]
   D[Interface] --> |Requests|C
   C --> |Objects|D
+  E[Data Structure] --> |Objects|C
+  C --> |Requests|E
 ```

@@ -7,6 +7,10 @@
 #include "constants.h"
 #include "string_conversion.h"
 
+#define TYPE_DELIMETER KV_PARSER_TYPE_DELIMITER
+#define KEY_DELIMETER KV_PARSER_KEY_DELIMITER
+#define VALUE_DELIMETER KV_PARSER_VALUE_DELIMITER
+
 typedef struct _db_entry_t {
   int64_t type;
   uint8_t *key;

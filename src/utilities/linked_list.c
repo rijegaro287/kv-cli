@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#include "linked_list.h"
+
+extern list_t* create_list() {
+  list_t* new_list = malloc(sizeof(list_t));
+  new_list->size = 0;
+  new_list->head = NULL;
+  return new_list;
+}
+
+extern int64_t list_insert(list_t* list, db_entry_t *entry) {
+  node_t* new_node = malloc(sizeof(node_t));
+  if (new_node == NULL) {
+    perror("Error: Failed to allocated memory for a node.");
+    return -1;
+  }
+
+  new_node->entry = entry;
+  new_node->next = NULL;
+
+  printf("**** key: %s\n", new_node->entry->key);
+
+  if(list->head == NULL) {
+    list->head = new_node;
+  }
+  else {
+    node_t* current_node = list->head;
+    while(current_node->next != NULL) {
+      current_node = current_node->next;
+    }
+    current_node->next = new_node;
+  }
+
+  list->size++;
+
+  return 0;
+}
+
+extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
+  if (idx >= list->size) {
+    printf("Index %d out of range for list", idx);
+    return NULL;
+  }
+  
+  uint64_t current_idx = 0;
+  node_t* current_node = list->head;
+  while (current_node != NULL) {
+    if (current_idx == idx) {
+      return current_node->entry;
+    }
+    current_idx++;
+    current_node = current_node->next;
+  }
+}
+
+// extern void list_update(list_t* list, db_entry_t *entry, uint64_t idx) {
+//   if (idx >= list->size) {
+//     printf("Index %d out of range for list", idx);
+//     return;
+//   }
+  
+//   uint64_t current_idx = 0;
+//   node_t* current_node = list->head;
+//   while (current_node != NULL) {
+//     if (current_idx == idx) {
+//       current_node->value = value;
+//       return;
+//     }
+//     current_idx++;
+//     current_node = current_node->next;
+//   }
+// }
+
+// extern void list_delete(list_t* list, uint64_t idx) {
+//   if (idx >= list->size) {
+//     printf("Index %d out of range for list", idx);
+//     return;
+//   }
+  
+//   uint64_t current_idx = 0;
+//   node_t* prev_node;
+//   node_t* current_node = list->head;
+//   while (current_node != NULL) {
+//     if (current_idx == idx) {
+//       prev_node->next = current_node->next;
+//       list->size--;
+//       free(current_node);
+//       break;
+//     }
+//     current_idx++;
+//     prev_node = current_node;
+//     current_node = current_node->next;
+//   }
+// }
+
+// extern void list_clean(list_t* list) {
+//   node_t* current_node = list->head;
+//   node_t* next_node;
+//   while(current_node != NULL) {
+//     printf("Cleaning node with value: %d\n", current_node->value);
+//     next_node = current_node->next;
+//     free(current_node);
+//     current_node = next_node;
+//   }
+
+//   list->head = NULL;
+//   free(list);
+//   list = NULL;
+// }
+
+extern void list_print(list_t* list) {
+  if (list->size == 0) {
+    printf("Linked list is empty\n");
+    return;
+  }
+
+  for (uint64_t i = 0; i < list->size; i++) {
+    db_entry_t *entry = list_get_by_idx(list, i);
+    print_entry(entry);
+  }
+}

@@ -9,7 +9,7 @@ static int64_t set_integer_value(db_entry_t *dest, uint8_t *str_value, uint64_t 
   
   dest->value_ptr = malloc(type_size);
   if (dest->value_ptr == NULL) {
-    perror("Error: Failed to allocate memory");
+    perror("Error: Failed to allocate memory for value");
     return -1;
   }
   
@@ -124,6 +124,10 @@ static int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
 
 extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value) {
   db_entry_t *entry_ptr = malloc(sizeof(db_entry_t));
+  if (entry_ptr == NULL) {
+    perror("Error: failed to allocated memory for database entry");
+  }
+  
   entry_ptr->type = map_data_type_str(type);
   entry_ptr->key = key;
   entry_ptr->value_ptr = NULL;
@@ -132,6 +136,7 @@ extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value) 
 }
 
 extern void print_entry(db_entry_t *entry) {
+  printf("**** key: %s\n", entry->key);
   void *value_ptr = entry->value_ptr;
   switch (entry->type) {
   case INT8_TYPE:
