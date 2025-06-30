@@ -7,30 +7,39 @@ static cli_cmd_t *get_cmd() {
   fgets(input_cmd, LINE_BUFFER_SIZE, stdin);
   input_cmd[strcspn(input_cmd, "\n")] = '\0';
   
-  printf("Entered Value: %s\n", input_cmd);
-  
   cli_cmd_t *cmd_ptr = malloc(sizeof(cli_cmd_t));
   if(cmd_ptr == NULL) {
-    perror("Error: Failed to allocate command memory");
+    perror("Error: Failed to allocate command memory\n");
     return NULL;
   }
 
-  strcpy(cmd_ptr->cmd, strtok(input_cmd, " "));
-  strcpy(cmd_ptr->param_1, strtok(NULL, " "));
-  strcpy(cmd_ptr->param_2, strtok(NULL, " "));
-  strcpy(cmd_ptr->param_3, strtok(NULL, "\n"));
+  uint8_t *cmd, *param_1, *param_2, *param_3;
+  cmd = strtok(input_cmd, " ");
+  param_1 = strtok(NULL, " ");
+  param_2 = strtok(NULL, " ");
+  param_3 = strtok(NULL, "\n");
 
-  // cmd_ptr->cmd = strtok(input_cmd, " ");
-  // cmd_ptr->param_1 = strtok(NULL, " ");
-  // cmd_ptr->param_2 = strtok(NULL, " ");
-  // cmd_ptr->param_3 = strtok(NULL, "\n");
-
-  if (cmd_ptr->cmd == NULL) {
-    perror("Error: Failed to read a cmd\n");
+  if (cmd == NULL) {
+    fprintf(stderr, "Error: Invalid command %s\n", input_cmd);
     free(cmd_ptr);
     return NULL;
   }
+  else {
+    strcpy(cmd_ptr->cmd, cmd);
+  }
 
+  if (param_1 != NULL) {
+    strcpy(cmd_ptr->param_1, param_1);
+  }
+
+  if (param_2 != NULL) {
+    strcpy(cmd_ptr->param_2, param_2);
+  }
+
+  if (param_3 != NULL) {
+    strcpy(cmd_ptr->param_3, param_3);
+  }
+  
   return cmd_ptr;
 }
 
@@ -40,9 +49,9 @@ static int64_t load_command(cli_cmd_t *cmd_ptr) {
     return -1;
   }
 
-  if (cmd_ptr->param_1 == NULL ||
-      cmd_ptr->param_2 == NULL ||
-      cmd_ptr->param_3 == NULL) {
+  if (strlen(cmd_ptr->param_1) <= 0 ||
+      strlen(cmd_ptr->param_2) <= 0 ||
+      strlen(cmd_ptr->param_3) <= 0) {
     perror("\"load\" requires three parameters: load <db_path> <db_alias> <storage_type>\n");
     return -1;
   }
@@ -94,7 +103,7 @@ static int64_t list_command(cli_cmd_t *cmd) {
 }
 
 static int64_t use_command(cli_cmd_t *cmd) {
-  if (cmd->param_1 == NULL) {
+  if (strlen(cmd->param_1) <= 0) {
     perror("\"use\" requires one parameter: use <db_alias>\n");
     return -1;
   }
