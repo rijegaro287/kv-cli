@@ -1,6 +1,8 @@
 #pragma once
 
 #define LINE_BUFFER_SIZE 1024
+#define DB_PATH_BUFFER_SIZE 256
+#define DB_ID_BUFFER_SIZE 256
 
 #define TEST_DB_PATH "./tests/data/test.db"
 

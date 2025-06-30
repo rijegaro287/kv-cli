@@ -1,45 +1,5 @@
 #include "kv_cli.h"
 
-static int64_t main_menu(cli_command_t **cmd_pptr) {
-  uint8_t input_command[LINE_BUFFER_SIZE];
-  printf("Please enter a command (enter help)\n");
-  printf("> ");
-  fgets(input_command, LINE_BUFFER_SIZE, stdin);
-  input_command[strcspn(input_command, "\n")] = '\0';
-
-  printf("Entered Value: %s\n", input_command);
-  
-  *cmd_pptr = (cli_command_t*)malloc(sizeof(cli_command_t));
-  if(*cmd_pptr == NULL) {
-    perror("Error: Failed to allocate command memory");
-    return -1;
-  }
-
-  (*cmd_pptr)->cmd = strtok(input_command, " ");
-  (*cmd_pptr)->param_1 = strtok(NULL, " ");
-  (*cmd_pptr)->param_2 = strtok(NULL, " ");
-  (*cmd_pptr)->param_3 = strtok(NULL, "\n");
-
-  if ((*cmd_pptr)->cmd == NULL) {
-    perror("Error: Failed to read a command\n");
-    return -1;
-  }
-
-  if (strcmp((*cmd_pptr)->cmd, CLI_STR_COMMAND_LOAD) == 0) {
-    return CLI_COMMAND_LOAD;
-  }
-  else if (strcmp((*cmd_pptr)->cmd, CLI_STR_COMMAND_HELP) == 0) {
-    return CLI_COMMAND_HELP;
-  }
-  else if (strcmp((*cmd_pptr)->cmd, CLI_STR_COMMAND_EXIT) == 0) {
-    return CLI_COMMAND_EXIT;
-  }
-  else {
-    fprintf(stderr, "Error: Invalid command entered %s\n", (*cmd_pptr)->cmd);
-    return -1;
-  }
-}
-
 static int64_t load_command(cli_command_t *cmd_ptr) {
   if (db_count >= KV_CLI_MAX_OPEN_DATABASES) {
     perror("Reached max number of open databases. Nothing done\n");
@@ -54,9 +14,9 @@ static int64_t load_command(cli_command_t *cmd_ptr) {
   }
 
   for (uint64_t i = 0; i < db_count; i++) {
-    uint8_t *db_id = db_ids[i];
-    if (strcmp(db_id, cmd_ptr->param_2) == 0) {
-      fprintf(stderr, "Error: Database with alias \"%s\" already exists\n", db_id);
+    cli_db_t *cli_db = db_list[i];
+    if (strcmp(cli_db->id, cmd_ptr->param_2) == 0) {
+      fprintf(stderr, "Error: Database with alias \"%s\" already exists\n", cli_db->id);
       return -1;
     }
   }
@@ -76,31 +36,74 @@ static int64_t load_command(cli_command_t *cmd_ptr) {
     return -1;
   }
   
-  db_list[db_count] = new_db;
-  strcpy(db_ids[db_count], cmd_ptr->param_2);
+  cli_db_t *cli_db = malloc(sizeof(cli_db_t));
+  cli_db->db = new_db;
+  strcpy(cli_db->path, cmd_ptr->param_1);
+  strcpy(cli_db->id, cmd_ptr->param_2);
+  
+  db_list[db_count] = cli_db;
   db_count++;
 
   return 0;
 }
 
+static int64_t list_command(cli_command_t *command) {
+  if (db_count == 0) {
+    printf("- No databases loaded\n");
+    return 0;
+  }
+
+  for (uint64_t i = 0; i < db_count; i++) {
+    cli_db_t *cli_db = db_list[i];
+    printf("\t%s\t%s\n", cli_db->path, cli_db->id);
+  }
+  return 0;
+}
+
 extern void start_cli() {
   while (true) {
-    printf("===============================================\n");
+    printf("===============================================\n");    
+    uint8_t input_cmd[LINE_BUFFER_SIZE];
+    printf("Please enter a command (enter help)\n");
+    printf("> ");
+    fgets(input_cmd, LINE_BUFFER_SIZE, stdin);
+    input_cmd[strcspn(input_cmd, "\n")] = '\0';
+    
+    printf("Entered Value: %s\n", input_cmd);
+    
+    cli_command_t *cmd_ptr;
+    cmd_ptr = malloc(sizeof(cli_command_t));
+    if(cmd_ptr == NULL) {
+      perror("Error: Failed to allocate command memory");
+      continue;
+    }
+
+    cmd_ptr->cmd = strtok(input_cmd, " ");
+    cmd_ptr->param_1 = strtok(NULL, " ");
+    cmd_ptr->param_2 = strtok(NULL, " ");
+    cmd_ptr->param_3 = strtok(NULL, "\n");
+
+    if (cmd_ptr->cmd == NULL) {
+      perror("Error: Failed to read a command\n");
+      continue;
+    }
+
     int64_t cmd_result;
-    cli_command_t *command_ptr;
-    switch (main_menu(&command_ptr)) {
-    case CLI_COMMAND_LOAD:
-      cmd_result = load_command(command_ptr);
-      break;
-    case CLI_COMMAND_HELP:
-      printf("HELP COMMAND ENTERED\n");
-      break;
-    case CLI_COMMAND_EXIT:
-      printf("EXIT COMMAND ENTERED\n");
+    if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_LOAD) == 0) {
+      cmd_result = load_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_LIST) == 0) {
+      cmd_result = list_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_HELP) == 0) {
+      cmd_result = 0;
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_EXIT) == 0) {
       return;
-    default:
-      perror("Error: Invalid command\n");
-      cmd_result = -1;
+    }
+    else {
+      fprintf(stderr, "Error: Invalid command entered %s\n", cmd_ptr->cmd);
+      int64_t cmd_result = -1;
     }
 
     if (cmd_result < 0) {
