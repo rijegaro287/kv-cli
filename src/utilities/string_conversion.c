@@ -15,10 +15,10 @@ extern int64_t map_data_type_str(uint8_t *type) {
   }
 }
 
-extern int64_t str_to_int64(char *str_value, int64_t *dest) {
+extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest) {
   errno = 0;
-  char *end;
-  int64_t int_value = strtoll(str_value, &end, 10);
+  uint8_t *end;
+  int64_t int_value = strtoll(str_value, (char**)&end, 10);
 
   if (str_value == end) {
     fprintf(stderr, "Error %s is not a number", str_value);
@@ -34,10 +34,10 @@ extern int64_t str_to_int64(char *str_value, int64_t *dest) {
   return 0;
 }
 
-extern int64_t str_to_float(char *str_value, float *dest) {
+extern int64_t str_to_float(uint8_t *str_value, float *dest) {
   errno = 0;
-  char *end;
-  float float_value = strtof(str_value, &end);
+  uint8_t *end;
+  float float_value = strtof(str_value, (char**)&end);
 
   if (str_value == end) {
     fprintf(stderr, "Error %s is not a number", str_value);
@@ -53,10 +53,10 @@ extern int64_t str_to_float(char *str_value, float *dest) {
   return 0;
 }
 
-extern int64_t str_to_double(char *str_value, double *dest) {
+extern int64_t str_to_double(uint8_t *str_value, double *dest) {
   errno = 0;
-  char *end;
-  double double_value = strtod(str_value, &end);
+  uint8_t *end;
+  double double_value = strtod(str_value, (char**)&end);
 
   if (str_value == end) {
     fprintf(stderr, "Error %s is not a number", str_value);
@@ -72,7 +72,7 @@ extern int64_t str_to_double(char *str_value, double *dest) {
   return 0;
 }
 
-extern int64_t str_to_bool(char *str_value, bool *dest) {
+extern int64_t str_to_bool(uint8_t *str_value, bool *dest) {
   if (strcmp(str_value, "true") == 0) {
     bool bool_value = true;
     memcpy(dest, &bool_value, sizeof(bool));

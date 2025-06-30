@@ -69,3 +69,19 @@ flowchart LR
   E[Data Structure] --> |Objects|C
   C --> |Requests|E
 ```
+
+### CLI Design
+
+#### Main Menu
+* Welcome message
+* \> _waiting for command_:
+  1. Load a Database from a File
+    * load \<db_path\> \<storage_type\>
+  2. Use a loaded database:
+     * use <db_id>
+  3. List loaded databases:
+     * list 
+  4. Help
+      * help
+  5. Exit
+      * exit
