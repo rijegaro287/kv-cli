@@ -37,8 +37,9 @@
 * Create the configurable data structure ✓
 * Load the database into the structure ✓
 * Add CLI Loop
-  * Ability to load more than one database into memory
+  * Ability to load more than one database into memory ✓
   * Switch between the loaded ones
+  * put, get, delete from db
 * Static Library
 * Add Tests framework
 
@@ -76,7 +77,8 @@ flowchart LR
 * Welcome message
 * \> _waiting for command_:
   1. Load a Database from a File
-    * load \<db_path\> \<storage_type\>
+    * load \<db_path\> \<db_alias\> \<storage_type\> ✓
+    * Must check that the alias y not repeated
   2. Use a loaded database:
      * use <db_id>
   3. List loaded databases:

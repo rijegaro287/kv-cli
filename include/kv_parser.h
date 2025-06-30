@@ -23,5 +23,6 @@ static int64_t set_double_value(db_entry_t *dest, uint8_t *str_value);
 static int64_t set_bool_value(db_entry_t *dest, uint8_t *str_value);
 static int64_t set_string_value(db_entry_t *dest, uint8_t *str_value);
 static int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value);
-extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value);
+// extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value);
+extern db_entry_t* create_db_entry(uint8_t *line);
 extern void print_entry(db_entry_t *entry);

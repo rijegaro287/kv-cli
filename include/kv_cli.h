@@ -11,8 +11,9 @@
 
 typedef struct _cli_command_t {
   uint8_t *cmd;
-  uint8_t *first_param;
-  uint8_t *second_param;
+  uint8_t *param_1;
+  uint8_t *param_2;
+  uint8_t *param_3;
 } cli_command_t;
 
 enum CLI_COMMANDS {
@@ -25,7 +26,7 @@ static db_t *db_list[KV_CLI_MAX_OPEN_DATABASES];
 static uint8_t db_ids[KV_CLI_MAX_OPEN_DATABASES][LINE_BUFFER_SIZE];
 static uint64_t db_count = 0;
 
-extern int64_t main_menu();
-extern void start_cli();
+static int64_t main_menu(cli_command_t **command_ptr);
+static int64_t load_command(cli_command_t *command);
 
-extern int64_t open_db(uint8_t *db_path, uint8_t *db_storage, uint8_t *db_id);
+extern void start_cli();

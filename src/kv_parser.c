@@ -122,7 +122,16 @@ static int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
   }
 }
 
-extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value) {
+extern db_entry_t* create_db_entry(uint8_t *line) {
+  if (strcmp(line, "\n") == 0 || line[0] == '#') return NULL;  
+  uint8_t *type, *key, *value;
+  if ((type = strtok(line, TYPE_DELIMETER)) == NULL ||
+      (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
+      (value = strtok(NULL, VALUE_DELIMETER)) == NULL) {
+    perror("Error: Failed to tokenize an entry");
+    return NULL;
+  }
+
   db_entry_t *entry_ptr = malloc(sizeof(db_entry_t));
   if (entry_ptr == NULL) {
     perror("Error: failed to allocated memory for database entry");
@@ -132,35 +141,58 @@ extern db_entry_t* create_db_entry(uint8_t *type, uint8_t *key, uint8_t *value) 
   entry_ptr->value_ptr = NULL;
   strcpy(entry_ptr->key, key);
   set_entry_value(entry_ptr, value);
+
+  if (entry_ptr->type < 0 ||
+      entry_ptr->key == NULL ||
+      entry_ptr->value_ptr == NULL) {
+    perror("Error: Failed to create entry object");
+    return NULL;
+  }
+
   return entry_ptr;
 }
 
 extern void print_entry(db_entry_t *entry) {
-  // void *value_ptr = entry->value_ptr;
   switch (entry->type) {
   case INT8_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint8_t*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type,
+                                             entry->key,
+                                             *(uint8_t*)entry->value_ptr);
     break;
   case INT16_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint16_t*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type,
+                                             entry->key,
+                                             *(uint16_t*)entry->value_ptr);
     break;
   case INT32_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint32_t*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type,
+                                             entry->key,
+                                             *(uint32_t*)entry->value_ptr);
     break;
   case INT64_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(uint64_t*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type,
+                                             entry->key,
+                                             *(uint64_t*)entry->value_ptr);
     break;
   case BOOL_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type, entry->key, *(bool*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %d\n", entry->type,
+                                             entry->key,
+                                             *(bool*)entry->value_ptr);
     break;
   case FLOAT_TYPE:
-    printf("type: %d, key: %s, value: %f\n", entry->type, entry->key, *(float*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %f\n", entry->type,
+                                             entry->key,
+                                             *(float*)entry->value_ptr);
     break;
   case DOUBLE_TYPE:
-    printf("type: %d, key: %s, value: %f\n", entry->type, entry->key, *(double*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %f\n", entry->type,
+                                             entry->key,
+                                             *(double*)entry->value_ptr);
     break;
   case STR_TYPE:
-    printf("type: %d, key: %s, value: %s\n", entry->type, entry->key, (uint8_t*)entry->value_ptr);
+    printf("type: %d, key: %s, value: %s\n", entry->type,
+                                             entry->key, 
+                                             (uint8_t*)entry->value_ptr);
     break;
   default:
     perror("Error: Invalid Data Type");

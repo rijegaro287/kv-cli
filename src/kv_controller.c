@@ -2,14 +2,14 @@
 
 extern db_entry_t *get_by_idx(db_t *db_ptr, uint64_t idx) {
   db_entry_t *entry;
-  if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_by_idx((list_t*)db_ptr->storage, idx);
     if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
     }
   }
-  else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
     return NULL;
   }
@@ -22,14 +22,14 @@ extern db_entry_t *get_by_idx(db_t *db_ptr, uint64_t idx) {
 
 extern db_entry_t *get_by_key(db_t *db_ptr, uint8_t *key) {
   db_entry_t *entry;
-  if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_by_key((list_t*)db_ptr->storage, key);
     if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
     }
   }
-  else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
     printf("Unimplemented: Hash Table");
     return NULL;
@@ -42,14 +42,14 @@ extern db_entry_t *get_by_key(db_t *db_ptr, uint8_t *key) {
 }
 
 extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
-  if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
     if (list_insert((list_t*)db_ptr->storage, entry_ptr) < 0) {
       perror("Error: Failed to insert entry into list");
       return -1;
     }
     return 0;
   }
-  else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
     printf("Unimplemented: Hash Table");
     return -1;
@@ -60,14 +60,14 @@ extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
   }
 }
 
-extern db_t *create_db(uint8_t *storage_structure) {
+extern db_t *create_db(uint8_t *db_storage) {
   db_t *db_ptr = malloc(sizeof(db_t));
   db_ptr->id = 0;
-  if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    db_ptr->storage = malloc(sizeof(list_t));
-    memset(db_ptr->storage, '\0', sizeof(list_t));
+  if(strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    db_ptr->storage = create_list();
+    // memset(db_ptr->storage, '\0', sizeof(list_t));
   }
-  else if(strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+  else if(strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
     printf("Unimplemented: Hash Table");
     return NULL;
@@ -85,7 +85,9 @@ extern db_t *create_db(uint8_t *storage_structure) {
   return db_ptr;
 }
 
-extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *storage_structure) {
+extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *db_storage) {
+  printf("**** %s, %s\n", file_path, db_storage);
+
   FILE *db_file_ptr = fopen(file_path, "r");
   if (db_file_ptr == NULL) {
     perror("Error: Failed to read the database file.\n");
@@ -94,23 +96,15 @@ extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *storage_struct
 
   uint8_t line_buffer[LINE_BUFFER_SIZE];
   while (fgets(line_buffer, LINE_BUFFER_SIZE, db_file_ptr) != NULL) {
-    if (strcmp(line_buffer, "\n") == 0 || line_buffer[0] == '#') continue;  
-    uint8_t *type, *key, *value;
-    if ((type = strtok(line_buffer, TYPE_DELIMETER)) == NULL ||
-        (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
-        (value = strtok(NULL, VALUE_DELIMETER)) == NULL) {
-      perror("Error: Failed to tokenize an entry");
-      continue;
-    }
-    
-    db_entry_t *entry = create_db_entry(type, key, value);
-    if (entry->type < 0 || entry->key == NULL || entry->value_ptr == NULL) {
-      perror("Error: Failed to create entry object");
-      continue; 
+    db_entry_t *entry = create_db_entry(line_buffer);
+    if (entry == NULL) {
+      perror("Error: Failed to create entry object\n");
+      return -1;
     }
 
-    if(insert_entry(db_ptr, entry) < 0) {
-      perror("Error: Failed to insert entry into storage");
+    if (insert_entry(db_ptr, entry) < 0) {
+      perror("Error: Failed to insert entry into storage\n");
+      return -1;
     }
   }
 
@@ -123,10 +117,10 @@ extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *storage_struct
 }
 
 extern void print_db(db_t *db_ptr) {
-  if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
     list_print((list_t*)db_ptr->storage);
   }
-  else if (strcmp(storage_structure, KV_STORAGE_STRUCTURE_HASH) == 0) {
+  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
     printf("Unimplemented: Hash Table");
   }
