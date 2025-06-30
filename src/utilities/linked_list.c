@@ -25,8 +25,18 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
   else {
     node_t* current_node = list->head;
     while(current_node->next != NULL) {
+      if (strcmp(current_node->entry->key, entry->key) == 0) {
+        fprintf(stderr, "Error: Entry with key \"%s\" already exists.", entry->key);
+        return -1;
+      }
       current_node = current_node->next;
     }
+
+    if (strcmp(current_node->entry->key, entry->key) == 0) {
+      fprintf(stderr, "Error: Entry with key \"%s\" already exists.", entry->key);
+      return -1;
+    }
+
     current_node->next = new_node;
   }
 

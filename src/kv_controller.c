@@ -65,7 +65,6 @@ extern db_t *create_db(uint8_t *db_storage) {
   db_ptr->id = 0;
   if(strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
     db_ptr->storage = create_list();
-    // memset(db_ptr->storage, '\0', sizeof(list_t));
   }
   else if(strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
     // db_ptr = malloc(sizeof hash_t)
@@ -86,8 +85,6 @@ extern db_t *create_db(uint8_t *db_storage) {
 }
 
 extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *db_storage) {
-  printf("**** %s, %s\n", file_path, db_storage);
-
   FILE *db_file_ptr = fopen(file_path, "r");
   if (db_file_ptr == NULL) {
     perror("Error: Failed to read the database file.\n");

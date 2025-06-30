@@ -6,6 +6,7 @@
 #include "kv_controller.h"
 
 #define CLI_STR_COMMAND_LOAD "load"
+#define CLI_STR_COMMAND_LIST "list"
 #define CLI_STR_COMMAND_HELP "help"
 #define CLI_STR_COMMAND_EXIT "exit"
 
@@ -18,6 +19,7 @@ typedef struct _cli_command_t {
 
 enum CLI_COMMANDS {
   CLI_COMMAND_LOAD,
+  CLI_COMMAND_LIST,
   CLI_COMMAND_HELP,
   CLI_COMMAND_EXIT
 };

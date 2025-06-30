@@ -53,7 +53,13 @@ static int64_t load_command(cli_command_t *cmd_ptr) {
     return -1;
   }
 
-  /* Check for the uniqueness of the db_ids */
+  for (uint64_t i = 0; i < db_count; i++) {
+    uint8_t *db_id = db_ids[i];
+    if (strcmp(db_id, cmd_ptr->param_2) == 0) {
+      fprintf(stderr, "Error: Database with alias \"%s\" already exists\n", db_id);
+      return -1;
+    }
+  }
 
   printf("- Loading database from path: %s as \"%s\"\n ", cmd_ptr->param_1, 
                                                           cmd_ptr->param_2);
