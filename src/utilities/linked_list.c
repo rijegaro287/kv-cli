@@ -134,6 +134,24 @@ extern db_entry_t *list_get_by_key(list_t* list, uint8_t *key) {
 //   list = NULL;
 // }
 
+extern void free_list(list_t* list) {
+  if (list->head == NULL) {
+    free(list);
+    return;
+  }
+
+  node_t *current_node = list->head;
+  node_t *next_node;
+  while (current_node != NULL) {
+    next_node = current_node->next;
+    free_entry(current_node->entry);
+    free(current_node);
+    current_node = next_node;
+  }
+
+  free(list);
+}
+
 extern void list_print(list_t* list) {
   if (list->size == 0) {
     printf("Linked list is empty\n");

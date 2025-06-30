@@ -35,4 +35,7 @@ static int64_t use_command(cli_cmd_t *cmd);
 
 static int64_t start_use(uint64_t db_idx);
 
+extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type);
+
 extern void start_cli();
+extern void free_cli_db(cli_db_t* cli_db);

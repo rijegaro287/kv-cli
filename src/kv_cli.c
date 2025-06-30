@@ -67,19 +67,18 @@ static int64_t load_command(cli_cmd_t *cmd_ptr) {
   printf("- Loading database from path: %s as \"%s\"\n ", cmd_ptr->param_1, 
                                                           cmd_ptr->param_2);
 
-  cli_db_t *cli_db = malloc(sizeof(cli_db_t));
-  cli_db->db = create_db(cmd_ptr->param_3);
-  if (cli_db->db == NULL) {
-    perror("Error: Failed to create new db\n");
+  cli_db_t *cli_db = create_cli_db(cmd_ptr->param_1,
+                                   cmd_ptr->param_2,
+                                   cmd_ptr->param_3);
+
+  if (cli_db == NULL) {
+    perror("Error: Failed to create db instance\n");
     return -1;
   }
-  strcpy(cli_db->path, cmd_ptr->param_1);
-  strcpy(cli_db->id, cmd_ptr->param_2);
-  cli_db->db->id = db_count;
 
-  if (load_db(cli_db->db, cmd_ptr->param_1) < 0) {
+  if (load_db(cli_db->db, cli_db->path) < 0) {
     perror("Error: Failed to load db into memory\n");
-    free(cli_db);
+    free_cli_db(cli_db);
     return -1;
   }
   
@@ -133,6 +132,20 @@ static int64_t start_use(uint64_t db_idx) {
   }
 }
 
+extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type) {
+  cli_db_t *cli_db = malloc(sizeof(cli_db_t));
+  cli_db->db = create_db(storage_type);
+  if (cli_db->db == NULL) {
+    perror("Error: Failed to create new db\n");
+    free_cli_db(cli_db);
+    return NULL;
+  }
+  strcpy(cli_db->path, path);
+  strcpy(cli_db->id, storage_type);
+  cli_db->db->id = db_count;
+  return cli_db;
+}
+
 extern void start_cli() {
   while (true) {
     printf("===============================================\n");
@@ -162,4 +175,11 @@ extern void start_cli() {
       perror("Error: Failed to execute cmd\n");
     }
   }
+}
+
+extern void free_cli_db(cli_db_t* cli_db) {
+  if (cli_db->db != NULL) {
+    free_db(cli_db->db);
+  }
+  free(cli_db);
 }

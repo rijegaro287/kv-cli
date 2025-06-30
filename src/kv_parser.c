@@ -126,7 +126,7 @@ static int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
   }
 }
 
-extern db_entry_t* create_db_entry(uint8_t *line) {
+extern db_entry_t* parse_line(uint8_t *line) {
   if (strcmp(line, "\n") == 0 || line[0] == '#') return NULL;  
   uint8_t *type, *key, *value;
   if ((type = strtok(line, TYPE_DELIMETER)) == NULL ||
@@ -136,26 +136,39 @@ extern db_entry_t* create_db_entry(uint8_t *line) {
     return NULL;
   }
 
-  db_entry_t *entry_ptr = malloc(sizeof(db_entry_t));
+  db_entry_t *entry_ptr = create_entry(type, key, value);
+  if (entry_ptr == NULL) {
+    perror("Error: Failed to create entry object\n");
+  }
+
+  return entry_ptr;
+}
+
+extern db_entry_t* create_entry(uint8_t *type, uint8_t *key, uint8_t *value) {
+ db_entry_t *entry_ptr = malloc(sizeof(db_entry_t));
   if (entry_ptr == NULL) {
     perror("Error: failed to allocated memory for database entry\n");
     return NULL;
   }
   
   entry_ptr->type = map_data_type_str(type);
-  entry_ptr->value_ptr = NULL;
   strcpy(entry_ptr->key, key);
   set_entry_value(entry_ptr, value);
 
   if (entry_ptr->type < 0 ||
       entry_ptr->key == NULL ||
       entry_ptr->value_ptr == NULL) {
-    perror("Error: Failed to create entry object");
-    free(entry_ptr);
+    perror("Error: Failed to create entry object\n");
+    free_entry(entry_ptr);
     return NULL;
   }
 
   return entry_ptr;
+}
+
+extern void free_entry(db_entry_t *entry) {
+  free(entry->value_ptr);
+  free(entry);
 }
 
 extern void print_entry(db_entry_t *entry) {

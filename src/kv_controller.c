@@ -103,7 +103,7 @@ extern int64_t load_db(db_t *db_ptr, uint8_t *file_path) {
 
   uint8_t line_buffer[LINE_BUFFER_SIZE];
   while (fgets(line_buffer, LINE_BUFFER_SIZE, db_file_ptr) != NULL) {
-    db_entry_t *entry = create_db_entry(line_buffer);
+    db_entry_t *entry = parse_line(line_buffer);
     if (entry == NULL) {
       perror("Error: Failed to create entry object\n");
       return -1;
@@ -121,6 +121,21 @@ extern int64_t load_db(db_t *db_ptr, uint8_t *file_path) {
   }
 
   return 0;
+}
+
+extern void free_db(db_t *db) {
+  if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    if (db->storage != NULL) {
+      free_list(db->storage);
+    }
+  }
+  else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
+    printf("Uninplemented: free hash storage");
+  }
+  else {
+    free(db->storage);
+  }
+  free(db);
 }
 
 extern void print_db(db_t *db_ptr) {
