@@ -26,6 +26,10 @@ static int64_t set_integer_value(db_entry_t *dest, uint8_t *str_value, uint64_t 
   case sizeof(int64_t):
     *(int64_t*)dest->value_ptr = (int64_t)value_ptr;
     break;
+  default:
+    perror("Invalid type size for int value");
+    free(dest->value_ptr);
+    return -1;
   }
 
   return 0;
@@ -128,13 +132,14 @@ extern db_entry_t* create_db_entry(uint8_t *line) {
   if ((type = strtok(line, TYPE_DELIMETER)) == NULL ||
       (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
       (value = strtok(NULL, VALUE_DELIMETER)) == NULL) {
-    perror("Error: Failed to tokenize an entry");
+    perror("Error: Failed to tokenize an entry\n");
     return NULL;
   }
 
   db_entry_t *entry_ptr = malloc(sizeof(db_entry_t));
   if (entry_ptr == NULL) {
-    perror("Error: failed to allocated memory for database entry");
+    perror("Error: failed to allocated memory for database entry\n");
+    return NULL;
   }
   
   entry_ptr->type = map_data_type_str(type);
@@ -146,6 +151,7 @@ extern db_entry_t* create_db_entry(uint8_t *line) {
       entry_ptr->key == NULL ||
       entry_ptr->value_ptr == NULL) {
     perror("Error: Failed to create entry object");
+    free(entry_ptr);
     return NULL;
   }
 

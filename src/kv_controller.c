@@ -2,14 +2,14 @@
 
 extern db_entry_t *get_by_idx(db_t *db_ptr, uint64_t idx) {
   db_entry_t *entry;
-  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_by_idx((list_t*)db_ptr->storage, idx);
     if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
     }
   }
-  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
+  else if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
     return NULL;
   }
@@ -22,15 +22,14 @@ extern db_entry_t *get_by_idx(db_t *db_ptr, uint64_t idx) {
 
 extern db_entry_t *get_by_key(db_t *db_ptr, uint8_t *key) {
   db_entry_t *entry;
-  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_by_key((list_t*)db_ptr->storage, key);
     if (entry == NULL) {
       perror("Error: Failed to insert entry into list");
       return NULL;
     }
   }
-  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    // db_ptr = malloc(sizeof hash_t)
+  else if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
     return NULL;
   }
@@ -42,15 +41,14 @@ extern db_entry_t *get_by_key(db_t *db_ptr, uint8_t *key) {
 }
 
 extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
-  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     if (list_insert((list_t*)db_ptr->storage, entry_ptr) < 0) {
       perror("Error: Failed to insert entry into list");
       return -1;
     }
     return 0;
   }
-  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    // db_ptr = malloc(sizeof hash_t)
+  else if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
     return -1;
   }
@@ -60,31 +58,43 @@ extern int64_t insert_entry(db_t *db_ptr, db_entry_t *entry_ptr) {
   }
 }
 
-extern db_t *create_db(uint8_t *db_storage) {
-  db_t *db_ptr = malloc(sizeof(db_t));
-  db_ptr->id = 0;
-  if(strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    db_ptr->storage = create_list();
+extern db_t *create_db(uint8_t *storage_type) {
+  if (storage_type == NULL) {
+    perror("Error: storage_type parameter is NULL");
+    return NULL;
   }
-  else if(strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    // db_ptr = malloc(sizeof hash_t)
+  
+  db_t *db_ptr = malloc(sizeof(db_t));
+  if (db_ptr == NULL) {
+    perror("Error: Failed to allocate memory for db_t");
+    return NULL;
+  }
+  db_ptr->id = 0;
+  strcpy(db_ptr->storage_type, storage_type);
+
+  if(strcmp(storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    db_ptr->storage = create_list();
+    if (db_ptr->storage == NULL) {
+      perror("Error: Failed to create list storage");
+      free(db_ptr);
+      return NULL;
+    }
+  }
+  else if(strcmp(storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
+    free(db_ptr);
     return NULL;
   }
   else {
     perror("Error: Invalid storage structure");
-    return NULL;
-  }
-
-  if (db_ptr == NULL) {
-    perror("Error: Failed to allocated storage memory");
+    free(db_ptr);
     return NULL;
   }
 
   return db_ptr;
 }
 
-extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *db_storage) {
+extern int64_t load_db(db_t *db_ptr, uint8_t *file_path) {
   FILE *db_file_ptr = fopen(file_path, "r");
   if (db_file_ptr == NULL) {
     perror("Error: Failed to read the database file.\n");
@@ -114,11 +124,10 @@ extern int64_t load_db(db_t *db_ptr, uint8_t *file_path, uint8_t *db_storage) {
 }
 
 extern void print_db(db_t *db_ptr) {
-  if (strcmp(db_storage, KV_STORAGE_STRUCTURE_LIST) == 0) {
+  if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     list_print((list_t*)db_ptr->storage);
   }
-  else if (strcmp(db_storage, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    // db_ptr = malloc(sizeof hash_t)
+  else if (strcmp(db_ptr->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
     printf("Unimplemented: Hash Table");
   }
   else {

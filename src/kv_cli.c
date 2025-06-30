@@ -1,6 +1,40 @@
 #include "kv_cli.h"
 
-static int64_t load_command(cli_command_t *cmd_ptr) {
+static cli_cmd_t *get_cmd() {
+  uint8_t input_cmd[LINE_BUFFER_SIZE];
+  printf("Please enter a command (or help)\n");
+  printf("> ");
+  fgets(input_cmd, LINE_BUFFER_SIZE, stdin);
+  input_cmd[strcspn(input_cmd, "\n")] = '\0';
+  
+  printf("Entered Value: %s\n", input_cmd);
+  
+  cli_cmd_t *cmd_ptr = malloc(sizeof(cli_cmd_t));
+  if(cmd_ptr == NULL) {
+    perror("Error: Failed to allocate command memory");
+    return NULL;
+  }
+
+  strcpy(cmd_ptr->cmd, strtok(input_cmd, " "));
+  strcpy(cmd_ptr->param_1, strtok(NULL, " "));
+  strcpy(cmd_ptr->param_2, strtok(NULL, " "));
+  strcpy(cmd_ptr->param_3, strtok(NULL, "\n"));
+
+  // cmd_ptr->cmd = strtok(input_cmd, " ");
+  // cmd_ptr->param_1 = strtok(NULL, " ");
+  // cmd_ptr->param_2 = strtok(NULL, " ");
+  // cmd_ptr->param_3 = strtok(NULL, "\n");
+
+  if (cmd_ptr->cmd == NULL) {
+    perror("Error: Failed to read a cmd\n");
+    free(cmd_ptr);
+    return NULL;
+  }
+
+  return cmd_ptr;
+}
+
+static int64_t load_command(cli_cmd_t *cmd_ptr) {
   if (db_count >= KV_CLI_MAX_OPEN_DATABASES) {
     perror("Reached max number of open databases. Nothing done\n");
     return -1;
@@ -9,7 +43,7 @@ static int64_t load_command(cli_command_t *cmd_ptr) {
   if (cmd_ptr->param_1 == NULL ||
       cmd_ptr->param_2 == NULL ||
       cmd_ptr->param_3 == NULL) {
-    perror("\"load\" requires three parameters as arguments: load <db_path> <db_alias> <storage_type>\n");
+    perror("\"load\" requires three parameters: load <db_path> <db_alias> <storage_type>\n");
     return -1;
   }
 
@@ -24,22 +58,21 @@ static int64_t load_command(cli_command_t *cmd_ptr) {
   printf("- Loading database from path: %s as \"%s\"\n ", cmd_ptr->param_1, 
                                                           cmd_ptr->param_2);
 
-  db_t *new_db = create_db(cmd_ptr->param_3);
-  if (new_db == NULL) {
+  cli_db_t *cli_db = malloc(sizeof(cli_db_t));
+  cli_db->db = create_db(cmd_ptr->param_3);
+  if (cli_db->db == NULL) {
     perror("Error: Failed to create new db\n");
     return -1;
   }
-  new_db->id = db_count;
-  
-  if (load_db(new_db, cmd_ptr->param_1, cmd_ptr->param_3) < 0) {
-    perror("Error: Failed to load db into memory\n");
-    return -1;
-  }
-  
-  cli_db_t *cli_db = malloc(sizeof(cli_db_t));
-  cli_db->db = new_db;
   strcpy(cli_db->path, cmd_ptr->param_1);
   strcpy(cli_db->id, cmd_ptr->param_2);
+  cli_db->db->id = db_count;
+
+  if (load_db(cli_db->db, cmd_ptr->param_1) < 0) {
+    perror("Error: Failed to load db into memory\n");
+    free(cli_db);
+    return -1;
+  }
   
   db_list[db_count] = cli_db;
   db_count++;
@@ -47,7 +80,7 @@ static int64_t load_command(cli_command_t *cmd_ptr) {
   return 0;
 }
 
-static int64_t list_command(cli_command_t *command) {
+static int64_t list_command(cli_cmd_t *cmd) {
   if (db_count == 0) {
     printf("- No databases loaded\n");
     return 0;
@@ -55,42 +88,52 @@ static int64_t list_command(cli_command_t *command) {
 
   for (uint64_t i = 0; i < db_count; i++) {
     cli_db_t *cli_db = db_list[i];
-    printf("\t%s\t%s\n", cli_db->path, cli_db->id);
+    printf("\t%s\t%s\n", cli_db->id, cli_db->path);
   }
   return 0;
 }
 
+static int64_t use_command(cli_cmd_t *cmd) {
+  if (cmd->param_1 == NULL) {
+    perror("\"use\" requires one parameter: use <db_alias>\n");
+    return -1;
+  }
+
+  int64_t db_idx = -1;
+  for (int64_t i = 0; i < db_count; i++) {
+    cli_db_t *cli_db = db_list[i];
+    if (strcmp(cli_db->id, cmd->param_1) == 0) {
+      db_idx = i;
+      break;
+    }
+  }
+
+  if (db_idx < 0) {
+    fprintf(stderr, "Error: database alias %s does not exist\n", cmd->param_1);
+    return -1;
+  }
+
+  return start_use(db_idx);
+}
+
+static int64_t start_use(uint64_t db_idx) {
+  cli_db_t *cli_db = db_list[db_idx];
+  while (true) {
+    printf("-----------------------------------------------\n");
+    cli_cmd_t *cmd_ptr = get_cmd();
+  }
+}
+
 extern void start_cli() {
   while (true) {
-    printf("===============================================\n");    
-    uint8_t input_cmd[LINE_BUFFER_SIZE];
-    printf("Please enter a command (enter help)\n");
-    printf("> ");
-    fgets(input_cmd, LINE_BUFFER_SIZE, stdin);
-    input_cmd[strcspn(input_cmd, "\n")] = '\0';
-    
-    printf("Entered Value: %s\n", input_cmd);
-    
-    cli_command_t *cmd_ptr;
-    cmd_ptr = malloc(sizeof(cli_command_t));
-    if(cmd_ptr == NULL) {
-      perror("Error: Failed to allocate command memory");
-      continue;
-    }
-
-    cmd_ptr->cmd = strtok(input_cmd, " ");
-    cmd_ptr->param_1 = strtok(NULL, " ");
-    cmd_ptr->param_2 = strtok(NULL, " ");
-    cmd_ptr->param_3 = strtok(NULL, "\n");
-
-    if (cmd_ptr->cmd == NULL) {
-      perror("Error: Failed to read a command\n");
-      continue;
-    }
-
+    printf("===============================================\n");
+    cli_cmd_t *cmd_ptr = get_cmd();
     int64_t cmd_result;
     if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_LOAD) == 0) {
       cmd_result = load_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_USE) == 0) {
+      cmd_result = use_command(cmd_ptr);
     }
     else if (strcmp(cmd_ptr->cmd, CLI_STR_COMMAND_LIST) == 0) {
       cmd_result = list_command(cmd_ptr);
@@ -102,12 +145,12 @@ extern void start_cli() {
       return;
     }
     else {
-      fprintf(stderr, "Error: Invalid command entered %s\n", cmd_ptr->cmd);
+      fprintf(stderr, "Error: Invalid cmd entered %s\n", cmd_ptr->cmd);
       int64_t cmd_result = -1;
     }
 
     if (cmd_result < 0) {
-      perror("Error: Failed to execute command\n");
+      perror("Error: Failed to execute cmd\n");
     }
   }
 }

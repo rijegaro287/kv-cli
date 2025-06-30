@@ -4,6 +4,10 @@
 
 extern list_t* create_list() {
   list_t* new_list = malloc(sizeof(list_t));
+  if (new_list == NULL) {
+    perror("Error: Failed to allocated memory for a linked list.\n");
+    return NULL;
+  }
   new_list->size = 0;
   new_list->head = NULL;
   return new_list;
@@ -27,6 +31,7 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
     while(current_node->next != NULL) {
       if (strcmp(current_node->entry->key, entry->key) == 0) {
         fprintf(stderr, "Error: Entry with key \"%s\" already exists.", entry->key);
+        free(new_node);
         return -1;
       }
       current_node = current_node->next;
@@ -34,6 +39,7 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
 
     if (strcmp(current_node->entry->key, entry->key) == 0) {
       fprintf(stderr, "Error: Entry with key \"%s\" already exists.", entry->key);
+      free(new_node);
       return -1;
     }
 
