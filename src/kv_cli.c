@@ -141,8 +141,7 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
     return NULL;
   }
   strcpy(cli_db->path, path);
-  strcpy(cli_db->id, storage_type);
-  cli_db->db->id = db_count;
+  strcpy(cli_db->id, id);
   return cli_db;
 }
 

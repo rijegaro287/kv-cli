@@ -69,7 +69,6 @@ extern db_t *create_db(uint8_t *storage_type) {
     perror("Error: Failed to allocate memory for db_t");
     return NULL;
   }
-  db_ptr->id = 0;
   strcpy(db_ptr->storage_type, storage_type);
 
   if(strcmp(storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {

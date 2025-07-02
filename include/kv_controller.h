@@ -7,7 +7,6 @@
 #include "linked_list.h"
 
 typedef struct _db_t {
-  uint64_t id;
   uint8_t storage_type[CLI_CMD_BUFFER_SIZE];
   void *storage;
 } db_t;
