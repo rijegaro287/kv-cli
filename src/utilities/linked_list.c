@@ -51,6 +51,53 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
   return 0;
 }
 
+extern db_entry_t* list_find(list_t *list, uint8_t *key) {
+  node_t* current_node = list->head;
+  while (current_node != NULL) {
+    if (strcmp(current_node->entry->key, key) == 0) {
+      return current_node->entry;
+    }
+    current_node = current_node->next;
+  }
+  return NULL;
+}
+
+extern int64_t list_update(db_entry_t *entry, uint8_t* key, uint8_t* value, uint8_t* type) {
+  if (strlen(type) > 0) { 
+    entry->type = map_data_type_str(type);
+  }
+
+  if (set_entry_value(entry, value) < 0) {
+    fprintf(stderr, "Error: Failed to update entry with key \"%s\"", key);
+    return -1;
+  }
+
+  return 0;
+}
+
+extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* type) {
+  db_entry_t *entry = list_find(list, key);
+  if (entry != NULL) {
+    if (list_update(entry, key, value, type)) {
+      perror("Error: Failed to update an entry\n");
+      return -1;
+    }
+  }
+  else {
+    entry = create_entry(key, value, type);
+    if (entry == NULL) {
+      perror("Error: Failed to create entry.\n");
+      return -1;
+    }
+    
+    if (list_insert(list, entry) < 0) {      
+      perror("Error: Failed to insert entry into list.\n");
+      return -1;
+    }
+  }
+  return 0;
+}
+
 extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
   if (idx >= list->size) {
     printf("Index %d out of range for list", idx);
@@ -79,24 +126,6 @@ extern db_entry_t *list_get_by_key(list_t* list, uint8_t *key) {
   return NULL;
 }
 
-// extern void list_update(list_t* list, db_entry_t *entry, uint64_t idx) {
-//   if (idx >= list->size) {
-//     printf("Index %d out of range for list", idx);
-//     return;
-//   }
-  
-//   uint64_t current_idx = 0;
-//   node_t* current_node = list->head;
-//   while (current_node != NULL) {
-//     if (current_idx == idx) {
-//       current_node->value = value;
-//       return;
-//     }
-//     current_idx++;
-//     current_node = current_node->next;
-//   }
-// }
-
 // extern void list_delete(list_t* list, uint64_t idx) {
 //   if (idx >= list->size) {
 //     printf("Index %d out of range for list", idx);
@@ -117,21 +146,6 @@ extern db_entry_t *list_get_by_key(list_t* list, uint8_t *key) {
 //     prev_node = current_node;
 //     current_node = current_node->next;
 //   }
-// }
-
-// extern void list_clean(list_t* list) {
-//   node_t* current_node = list->head;
-//   node_t* next_node;
-//   while(current_node != NULL) {
-//     printf("Cleaning node with value: %d\n", current_node->value);
-//     next_node = current_node->next;
-//     free(current_node);
-//     current_node = next_node;
-//   }
-
-//   list->head = NULL;
-//   free(list);
-//   list = NULL;
 // }
 
 extern void free_list(list_t* list) {

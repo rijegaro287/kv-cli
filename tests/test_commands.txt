@@ -1,1 +1,2 @@
 load ./tests/data/test.db db1 L
+put key4 15

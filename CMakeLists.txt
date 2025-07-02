@@ -30,3 +30,7 @@ target_include_directories(kv_store PRIVATE
 
 file(COPY "${CMAKE_SOURCE_DIR}/tests/data/test.db" 
      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/tests/data/")
+
+
+# Add flag -fno-stack-protector
+# target_compile_options(kv_store PRIVATE -fno-stack-protector)
