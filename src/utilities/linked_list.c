@@ -149,6 +149,8 @@ extern db_entry_t *list_get_by_key(list_t* list, uint8_t *key) {
 // }
 
 extern void free_list(list_t* list) {
+  if (list == NULL) return;
+
   if (list->head == NULL) {
     free(list);
     return;

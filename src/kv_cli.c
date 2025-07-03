@@ -8,92 +8,115 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
     free_cli_db(cli_db);
     return NULL;
   }
-  strcpy(cli_db->path, path);
-  strcpy(cli_db->id, id);
+  strncpy(cli_db->path, path, LINE_BUFFER_SIZE);
+  strncpy(cli_db->id, id, CLI_CMD_BUFFER_SIZE);
   return cli_db;
 }
 
 extern void start_cli() {
+  int64_t cmd_result = -1;
   while (true) {
     printf("===============================================\n");
-    cli_cmd_t *cmd = get_cmd("- Please enter a command (or help)\n");
-    int64_t cmd_result;
-    if (strcmp(cmd->cmd, CLI_COMMAND_LOAD) == 0) {
-      cmd_result = load_command(cmd);
+    cli_cmd_t *cmd_ptr = get_cmd("- Please enter a command (or help)\n");
+    if (cmd_ptr ==  NULL) {
+      perror("Failed to allocated memory for a command\n");
+      cmd_result = -1;
+      continue;
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_USE) == 0) {
-      cmd_result = use_command(cmd);
+
+    if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LOAD) == 0) {
+      cmd_result = load_command(cmd_ptr);
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_LIST) == 0) {
-      cmd_result = list_command(cmd);
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_USE) == 0) {
+      cmd_result = use_command(cmd_ptr);
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_HELP) == 0) {
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LIST) == 0) {
+      cmd_result = list_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_HELP) == 0) {
       cmd_result = 0;
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_EXIT) == 0) {
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_EXIT) == 0) {
+      free_cli_command(cmd_ptr);
       return;
     }
     else {
-      fprintf(stderr, "Error: Invalid cmd entered %s\n", cmd->cmd);
+      fprintf(stderr, "Error: Invalid cmd entered %s\n", cmd_ptr->cmd);
       cmd_result = -1;
     }
 
     if (cmd_result < 0) {
       perror("Error: Failed to execute cmd\n");
     }
+  
+    free_cli_command(cmd_ptr);
   }
 }
 
 static int64_t start_use(uint64_t db_idx) {
+  int64_t cmd_result = -1;
   cli_db_t *cli_db = db_list[db_idx];
+  uint8_t msg[CLI_CMD_BUFFER_SIZE];
   while (true) {
     printf("-----------------------------------------------\n");
-    uint8_t msg[CLI_CMD_BUFFER_SIZE];
-    sprintf(msg, "(%s) - Please enter a command (or help)\n", cli_db->id);
-    cli_cmd_t *cmd = get_cmd(msg);
+    snprintf(msg, CLI_CMD_BUFFER_SIZE, "(%s) - Please enter a command (or help)\n", cli_db->id);
+    cli_cmd_t *cmd_ptr = get_cmd(msg);
+    if (cmd_ptr ==  NULL) {
+      perror("Failed to allocated memory for a command\n");
+      cmd_result = -1;
+      continue;
+    }
 
-    int64_t cmd_result;
-    if (strcmp(cmd->cmd, CLI_COMMAND_PUT) == 0) {
-      cmd_result = put_command(cli_db, cmd);
+    if (strcmp(cmd_ptr->cmd, CLI_COMMAND_PUT) == 0) {
+      cmd_result = put_command(cli_db, cmd_ptr);
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_GET) == 0) {
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_GET) == 0) {
       cmd_result = -1;
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_DELETE) == 0) {
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_DELETE) == 0) {
       cmd_result = -1;
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_PRINT) == 0) {
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_PRINT) == 0) {
       cmd_result = print_command(cli_db);
     }
-    else if (strcmp(cmd->cmd, CLI_COMMAND_EXIT) == 0) {
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_EXIT) == 0) {
       /* *** stack smashing detected ***: terminated */
+      /* There is no error if smashing detection is disabled */
+      free_cli_command(cmd_ptr);
       return 0;
     }
     else {
-      fprintf(stderr, "Error: Invalid cmd entered %s\n", cmd->cmd);
+      fprintf(stderr, "Error: Invalid cmd entered %s\n", cmd_ptr->cmd);
       cmd_result = -1;
     }
 
     if (cmd_result < 0) {
       perror("Error: Failed to execute cmd\n");
     }
+
+    free_cli_command(cmd_ptr);
   }
 }
 
-static cli_cmd_t *get_cmd(uint8_t *msg) {
+static cli_cmd_t* get_cmd(uint8_t *msg) {
   uint8_t input_cmd[LINE_BUFFER_SIZE];
   if (msg != NULL) {
     printf(msg);
   }
   printf("> ");
-  fgets(input_cmd, LINE_BUFFER_SIZE, stdin);
+  if (fgets(input_cmd, LINE_BUFFER_SIZE, stdin) == NULL) {
+    perror("Error: Failed to get input from user\n");
+    return NULL;
+  }
+
   input_cmd[strcspn(input_cmd, "\n")] = '\0';
   
   cli_cmd_t *cmd_ptr = malloc(sizeof(cli_cmd_t));
-  if(cmd_ptr == NULL) {
+  if (cmd_ptr == NULL) {
     perror("Error: Failed to allocate command memory\n");
     return NULL;
   }
+    memset(cmd_ptr, 0, sizeof(cli_cmd_t));
 
   uint8_t *cmd, *param_1, *param_2, *param_3;
   cmd = strtok(input_cmd, " ");
@@ -103,44 +126,48 @@ static cli_cmd_t *get_cmd(uint8_t *msg) {
 
   if (cmd == NULL) {
     fprintf(stderr, "Error: Invalid command %s\n", input_cmd);
-    free(cmd);
+    free_cli_command(cmd_ptr);
     return NULL;
   }
   else {
-    strcpy(cmd_ptr->cmd, cmd);
+    strncpy(cmd_ptr->cmd, cmd, CLI_CMD_BUFFER_SIZE);
+    cmd_ptr->cmd[CLI_CMD_BUFFER_SIZE - 1] = '\0';
   }
 
   if (param_1 != NULL) {
-    strcpy(cmd_ptr->param_1, param_1);
+    strncpy(cmd_ptr->param_1, param_1, CLI_CMD_BUFFER_SIZE);
+    cmd_ptr->param_1[CLI_CMD_BUFFER_SIZE - 1] = '\0';
   }
 
   if (param_2 != NULL) {
-    strcpy(cmd_ptr->param_2, param_2);
+    strncpy(cmd_ptr->param_2, param_2, CLI_CMD_BUFFER_SIZE);
+    cmd_ptr->param_2[CLI_CMD_BUFFER_SIZE - 1] = '\0';
   }
 
   if (param_3 != NULL) {
-    strcpy(cmd_ptr->param_3, param_3);
+    strncpy(cmd_ptr->param_3, param_3, CLI_CMD_BUFFER_SIZE);
+    cmd_ptr->param_3[CLI_CMD_BUFFER_SIZE - 1] = '\0';
   }
   
   return cmd_ptr;
 }
 
-static int64_t load_command(cli_cmd_t *cmd) {
+static int64_t load_command(cli_cmd_t *cmd_ptr) {
   if (db_count >= KV_CLI_MAX_OPEN_DATABASES) {
     perror("Reached max number of open databases. Nothing done\n");
     return -1;
   }
 
-  if (strlen(cmd->param_1) <= 0 ||
-      strlen(cmd->param_2) <= 0 ||
-      strlen(cmd->param_3) <= 0) {
+  if (strlen(cmd_ptr->param_1) <= 0 ||
+      strlen(cmd_ptr->param_2) <= 0 ||
+      strlen(cmd_ptr->param_3) <= 0) {
     perror("\"load\" requires three parameters: load <db_path> <db_id> <storage_type>\n");
     return -1;
   }
 
-  uint8_t *path = cmd->param_1;
-  uint8_t *id = cmd->param_2;
-  uint8_t *storage_type = cmd->param_3;
+  uint8_t *path = cmd_ptr->param_1;
+  uint8_t *id = cmd_ptr->param_2;
+  uint8_t *storage_type = cmd_ptr->param_3;
 
   for (uint64_t i = 0; i < db_count; i++) {
     cli_db_t *cli_db = db_list[i];
@@ -170,7 +197,7 @@ static int64_t load_command(cli_cmd_t *cmd) {
   return 0;
 }
 
-static int64_t list_command(cli_cmd_t *cmd) {
+static int64_t list_command(cli_cmd_t *cmd_ptr) {
   if (db_count == 0) {
     printf("- No databases loaded\n");
     return 0;
@@ -183,8 +210,8 @@ static int64_t list_command(cli_cmd_t *cmd) {
   return 0;
 }
 
-static int64_t use_command(cli_cmd_t *cmd) {
-  if (strlen(cmd->param_1) <= 0) {
+static int64_t use_command(cli_cmd_t *cmd_ptr) {
+  if (strlen(cmd_ptr->param_1) <= 0) {
     perror("\"use\" requires one parameter: use <db_id>\n");
     return -1;
   }
@@ -192,30 +219,30 @@ static int64_t use_command(cli_cmd_t *cmd) {
   int64_t db_idx = -1;
   for (int64_t i = 0; i < db_count; i++) {
     cli_db_t *cli_db = db_list[i];
-    if (strcmp(cli_db->id, cmd->param_1) == 0) {
+    if (strcmp(cli_db->id, cmd_ptr->param_1) == 0) {
       db_idx = i;
       break;
     }
   }
 
   if (db_idx < 0) {
-    fprintf(stderr, "Error: database id %s does not exist\n", cmd->param_1);
+    fprintf(stderr, "Error: database id %s does not exist\n", cmd_ptr->param_1);
     return -1;
   }
 
   return start_use(db_idx);
 }
 
-static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd) {
-  if (strlen(cmd->param_1) <= 0 ||
-      strlen(cmd->param_2) <= 0) {
+static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (strlen(cmd_ptr->param_1) <= 0 ||
+      strlen(cmd_ptr->param_2) <= 0) {
     perror("\"put\" requires two or three parameters: use <key> <value> <data_type (optional)>\n");
     return -1;
   }
 
-  uint8_t *key = cmd->param_1;
-  uint8_t *value = cmd->param_2;
-  uint8_t *type = cmd->param_3;
+  uint8_t *key = cmd_ptr->param_1;
+  uint8_t *value = cmd_ptr->param_2;
+  uint8_t *type = cmd_ptr->param_3;
 
   if (put_entry(cli_db->db, key, value, type) < 0) {
     fprintf(stderr, "Error: Failed to put entry with key \"%s\"\n", key);
@@ -225,7 +252,14 @@ static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd) {
   return 0;
 }
 
+extern void free_cli_command(cli_cmd_t *cmd_ptr) {
+  if (cmd_ptr == NULL) return;
+  free(cmd_ptr);
+}
+
 extern void free_cli_db(cli_db_t* cli_db) {
+  if (cli_db == NULL) return;
+
   if (cli_db->db != NULL) {
     free_db(cli_db->db);
   }

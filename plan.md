@@ -106,3 +106,7 @@ flowchart LR
         * s: saves the changes in the database file
           * Creates a temporary file .tmp in case the write fails
         * d: discards the changes and reloads the database from its file
+
+### Known Issues
+* There is no way of entering spaces when saving a string
+* 

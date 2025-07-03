@@ -177,7 +177,7 @@ extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
   }
   
   entry->type = map_data_type_str(type);
-  strcpy(entry->key, key);
+  strncpy(entry->key, key, CLI_CMD_BUFFER_SIZE);
   if (set_entry_value(entry, value) < 0) {
     fprintf(stderr, "Error: Failed to create entry with key \"%s\"", key);
     return NULL;
@@ -196,7 +196,11 @@ extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
 }
 
 extern void free_entry(db_entry_t *entry) {
-  free(entry->value);
+  if (entry == NULL) return;
+  
+  if (entry->value != NULL) {
+    free(entry->value);
+  }
   free(entry);
 }
 

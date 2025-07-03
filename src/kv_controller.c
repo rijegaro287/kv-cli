@@ -11,7 +11,7 @@ extern db_t *create_db(uint8_t *storage_type) {
     perror("Error: Failed to allocate memory for db_t");
     return NULL;
   }
-  strcpy(db->storage_type, storage_type);
+  strncpy(db->storage_type, storage_type, CLI_CMD_BUFFER_SIZE);
 
   if(strcmp(storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     db->storage = create_list();
@@ -141,6 +141,8 @@ extern db_entry_t *get_by_key(db_t *db, uint8_t *key) {
 }
 
 extern void free_db(db_t *db) {
+  if (db == NULL) return;
+
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     if (db->storage != NULL) {
       free_list(db->storage);

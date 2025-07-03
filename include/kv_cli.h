@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "kv_controller.h"
 
@@ -37,9 +38,10 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
 extern void start_cli();
 static int64_t start_use(uint64_t db_idx);
 static cli_cmd_t *get_cmd(uint8_t *msg);
-static int64_t load_command(cli_cmd_t *cmd);
-static int64_t list_command(cli_cmd_t *cmd);
-static int64_t use_command(cli_cmd_t *cmd);
-static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd);
+static int64_t load_command(cli_cmd_t *cmd_ptr);
+static int64_t list_command(cli_cmd_t *cmd_ptr);
+static int64_t use_command(cli_cmd_t *cmd_ptr);
+static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
+extern void free_cli_command(cli_cmd_t *cmd_ptr);
 extern void free_cli_db(cli_db_t *cli_db);
 static int64_t print_command(cli_db_t *cli_db);
