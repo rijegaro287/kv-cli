@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "logger.h"
 #include "kv_parser.h"
 
 typedef struct _node_t {

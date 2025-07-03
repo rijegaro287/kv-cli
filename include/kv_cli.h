@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "logger.h"
 #include "kv_controller.h"
 
 #define CLI_COMMAND_LOAD "load"

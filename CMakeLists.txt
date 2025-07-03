@@ -8,6 +8,7 @@ set(HEADERS
   include/kv_parser.h
   include/kv_controller.h
   include/kv_cli.h
+  include/utilities/logger.h
   include/utilities/string_conversion.h
   include/utilities/linked_list.h
   )
@@ -17,6 +18,7 @@ set(HEADERS
   src/kv_parser.c
   src/kv_controller.c
   src/kv_cli.c
+  src/utilities/logger.c
   src/utilities/string_conversion.c
   src/utilities/linked_list.c
 )

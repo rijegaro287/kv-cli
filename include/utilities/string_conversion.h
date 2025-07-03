@@ -6,6 +6,8 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include "logger.h"
+
 #define INT8_TYPE_STR "int8"
 #define INT16_TYPE_STR "int16"
 #define INT32_TYPE_STR "int32"

@@ -3,13 +3,13 @@
 static int64_t set_integer_value(db_entry_t *dest, uint8_t *str_value, uint64_t type_size) {
   uint64_t value;
   if (str_to_int64(str_value, &value) < 0) {
-    perror("Error: Failed to convert string to integer");
+    logger(3, "Error: Failed to convert string to integer\n");
     return -1;
   }
   
   dest->value = malloc(type_size);
   if (dest->value == NULL) {
-    perror("Error: Failed to allocate memory for value");
+    logger(3, "Error: Failed to allocate memory for value\n");
     return -1;
   }
   
@@ -27,7 +27,7 @@ static int64_t set_integer_value(db_entry_t *dest, uint8_t *str_value, uint64_t 
     *(int64_t*)dest->value = (int64_t)value;
     break;
   default:
-    perror("Invalid type size for int value");
+    logger(3, "Invalid type size for int value\n");
     free(dest->value);
     return -1;
   }
@@ -38,13 +38,13 @@ static int64_t set_integer_value(db_entry_t *dest, uint8_t *str_value, uint64_t 
 static int64_t set_float_value(db_entry_t *dest, uint8_t *str_value) {
   float value;
   if (str_to_float(str_value, &value) < 0) {
-    perror("Error: Failed to convert string to float");
+    logger(3, "Error: Failed to convert string to float\n");
     return -1;
   }
   
   dest->value = malloc(sizeof(float));
   if (dest->value == NULL) {
-    perror("Error: Failed to allocate memory");
+    logger(3, "Error: Failed to allocate memory\n");
     return -1;
   }
   
@@ -56,13 +56,13 @@ static int64_t set_float_value(db_entry_t *dest, uint8_t *str_value) {
 static int64_t set_double_value(db_entry_t *dest, uint8_t *str_value) {
   double value;
   if (str_to_double(str_value, &value) < 0) {
-    perror("Error: Failed to convert string to double");
+    logger(3, "Error: Failed to convert string to double\n");
     return -1;
   }
   
   dest->value = malloc(sizeof(double));
   if (dest->value == NULL) {
-    perror("Error: Failed to allocate memory");
+    logger(3, "Error: Failed to allocate memory\n");
     return -1;
   }
   
@@ -74,13 +74,13 @@ static int64_t set_double_value(db_entry_t *dest, uint8_t *str_value) {
 static int64_t set_bool_value(db_entry_t *dest, uint8_t *str_value) {
   bool value;
   if (str_to_bool(str_value, &value) < 0) {
-    perror("Error: Failed to convert string to bool");
+    logger(3, "Error: Failed to convert string to bool\n");
     return -1;
   }
   
   dest->value = malloc(sizeof(bool));
   if (dest->value == NULL) {
-    perror("Error: Failed to allocate memory");
+    logger(3, "Error: Failed to allocate memory\n");
     return -1;
   }
   
@@ -93,7 +93,7 @@ static int64_t set_string_value(db_entry_t *dest, uint8_t *str_value) {
   uint64_t str_len = strlen(str_value);
   dest->value = calloc(str_len + 1, sizeof(uint8_t));
   if (dest->value == NULL) {
-    perror("Error: Failed to allocate memory");
+    logger(3, "Error: Failed to allocate memory\n");
     return -1;
   }
   
@@ -135,12 +135,12 @@ extern int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
     result = set_string_value(dest, str_value);
     break;
   default:
-    fprintf(stderr, "Error: data type %ld is not a valid datatype.\n", dest->type);
+    logger(3, "Error: data type %ld is not a valid datatype.\n", dest->type);
     return -1;
   }
 
   if (result < 0) {
-    perror("Error: Failed to set entry value\n");
+    logger(3, "Error: Failed to set entry value\n");
     return -1;
   }
 
@@ -157,13 +157,13 @@ extern db_entry_t* parse_line(uint8_t *line) {
   if ((type = strtok(line, TYPE_DELIMETER)) == NULL ||
       (key = strtok(NULL, KEY_DELIMETER)) == NULL ||
       (value = strtok(NULL, VALUE_DELIMETER)) == NULL) {
-    perror("Error: Failed to tokenize an entry\n");
+    logger(3, "Error: Failed to tokenize an entry\n");
     return NULL;
   }
 
   db_entry_t *entry = create_entry(key, value, type);
   if (entry == NULL) {
-    perror("Error: Failed to create entry object\n");
+    logger(3, "Error: Failed to create entry object\n");
   }
 
   return entry;
@@ -172,14 +172,14 @@ extern db_entry_t* parse_line(uint8_t *line) {
 extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
  db_entry_t *entry = malloc(sizeof(db_entry_t));
   if (entry == NULL) {
-    perror("Error: failed to allocated memory for database entry\n");
+    logger(3, "Error: failed to allocated memory for database entry\n");
     return NULL;
   }
   
   entry->type = map_data_type_str(type);
   strncpy(entry->key, key, CLI_CMD_BUFFER_SIZE);
   if (set_entry_value(entry, value) < 0) {
-    fprintf(stderr, "Error: Failed to create entry with key \"%s\"", key);
+    logger(3, "Error: Failed to create entry with key \"%s\"\n", key);
     return NULL;
   }
 
@@ -187,7 +187,7 @@ extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
   if (entry->type < 0 ||
       entry->key == NULL ||
       entry->value == NULL) {
-    perror("Error: Failed to create entry object\n");
+    logger(3, "Error: Failed to create entry object\n");
     free_entry(entry);
     return NULL;
   }
@@ -207,46 +207,46 @@ extern void free_entry(db_entry_t *entry) {
 extern void print_entry(db_entry_t *entry) {
   switch (entry->type) {
   case INT8_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type,
-                                             entry->key,
-                                             *(uint8_t*)entry->value);
+    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
+                                                entry->key,
+                                                *(uint8_t*)entry->value);
     break;
   case INT16_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type,
-                                             entry->key,
-                                             *(uint16_t*)entry->value);
+    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
+                                                entry->key,
+                                                *(uint16_t*)entry->value);
     break;
   case INT32_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type,
-                                             entry->key,
-                                             *(uint32_t*)entry->value);
+    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
+                                                entry->key,
+                                                *(uint32_t*)entry->value);
     break;
   case INT64_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type,
-                                             entry->key,
-                                             *(uint64_t*)entry->value);
+    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
+                                                entry->key,
+                                                *(uint64_t*)entry->value);
     break;
   case BOOL_TYPE:
-    printf("type: %d, key: %s, value: %d\n", entry->type,
-                                             entry->key,
-                                             *(bool*)entry->value);
+    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
+                                                entry->key,
+                                                *(bool*)entry->value);
     break;
   case FLOAT_TYPE:
-    printf("type: %d, key: %s, value: %f\n", entry->type,
-                                             entry->key,
-                                             *(float*)entry->value);
+    logger(4, "type: %d, key: %s, value: %f\n", entry->type,
+                                                entry->key,
+                                                *(float*)entry->value);
     break;
   case DOUBLE_TYPE:
-    printf("type: %d, key: %s, value: %f\n", entry->type,
-                                             entry->key,
-                                             *(double*)entry->value);
+    logger(4, "type: %d, key: %s, value: %f\n", entry->type,
+                                                entry->key,
+                                                *(double*)entry->value);
     break;
   case STR_TYPE:
-    printf("type: %d, key: %s, value: %s\n", entry->type,
-                                             entry->key, 
-                                             (uint8_t*)entry->value);
+    logger(4, "type: %d, key: %s, value: %s\n", entry->type,
+                                                entry->key, 
+                                                (uint8_t*)entry->value);
     break;
   default:
-    perror("Error: Invalid Data Type");
+    logger(3, "Error: Invalid Data Type\n");
   }
 }

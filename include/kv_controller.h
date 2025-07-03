@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "constants.h"
+#include "logger.h"
 #include "kv_parser.h"
 #include "linked_list.h"
 

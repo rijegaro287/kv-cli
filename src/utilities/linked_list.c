@@ -5,7 +5,7 @@
 extern list_t* create_list() {
   list_t* new_list = malloc(sizeof(list_t));
   if (new_list == NULL) {
-    perror("Error: Failed to allocated memory for a linked list.\n");
+    logger(3, "Error: Failed to allocated memory for a linked list.\n");
     return NULL;
   }
   new_list->size = 0;
@@ -16,7 +16,7 @@ extern list_t* create_list() {
 extern int64_t list_insert(list_t* list, db_entry_t *entry) {
   node_t* new_node = malloc(sizeof(node_t));
   if (new_node == NULL) {
-    perror("Error: Failed to allocated memory for a node.\n");
+    logger(3, "Error: Failed to allocated memory for a node.\n");
     return -1;
   }
 
@@ -30,7 +30,7 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
     node_t* current_node = list->head;
     while(current_node->next != NULL) {
       if (strcmp(current_node->entry->key, entry->key) == 0) {
-        fprintf(stderr, "Error: Entry with key \"%s\" already exists.", entry->key);
+        logger(4, "Error: Entry with key \"%s\" already exists\n", entry->key);
         free(new_node);
         return -1;
       }
@@ -38,11 +38,11 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
     }
 
     if (strcmp(current_node->entry->key, entry->key) == 0) {
-      fprintf(stderr, "Error: Entry with key \"%s\" already exists.", entry->key);
+      logger(4, "Error: Entry with key \"%s\" already exists\n", entry->key);
       free(new_node);
       return -1;
     }
-
+    
     current_node->next = new_node;
   }
 
@@ -68,7 +68,7 @@ extern int64_t list_update(db_entry_t *entry, uint8_t* key, uint8_t* value, uint
   }
 
   if (set_entry_value(entry, value) < 0) {
-    fprintf(stderr, "Error: Failed to update entry with key \"%s\"", key);
+    logger(4, "Error: Failed to update entry with key \"%s\"\n", key);
     return -1;
   }
 
@@ -79,19 +79,19 @@ extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* typ
   db_entry_t *entry = list_find(list, key);
   if (entry != NULL) {
     if (list_update(entry, key, value, type)) {
-      perror("Error: Failed to update an entry\n");
+      logger(3, "Error: Failed to update an entry\n");
       return -1;
     }
   }
   else {
     entry = create_entry(key, value, type);
     if (entry == NULL) {
-      perror("Error: Failed to create entry.\n");
+      logger(3, "Error: Failed to create entry.\n");
       return -1;
     }
     
     if (list_insert(list, entry) < 0) {      
-      perror("Error: Failed to insert entry into list.\n");
+      logger(3, "Error: Failed to insert entry into list.\n");
       return -1;
     }
   }
@@ -100,7 +100,7 @@ extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* typ
 
 extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
   if (idx >= list->size) {
-    printf("Index %d out of range for list", idx);
+    logger(3, "Index %d out of range for list\n", idx);
     return NULL;
   }
   uint64_t current_idx = 0;
@@ -170,14 +170,14 @@ extern void free_list(list_t* list) {
 
 extern void list_print(list_t* list) {
   if (list->size == 0) {
-    printf("Linked list is empty\n");
+    logger(3, "Linked list is empty\n");
     return;
   }
 
   for (uint64_t i = 0; i < list->size; i++) {
     db_entry_t *entry = list_get_by_idx(list, i);
     if(entry == NULL) {
-      perror("Error: Entry not found");
+      logger(3, "Error: Entry not found\n");
       return;
     }
 

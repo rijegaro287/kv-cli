@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "constants.h"
+#include "logger.h"
 #include "string_conversion.h"
 
 #define TYPE_DELIMETER KV_PARSER_TYPE_DELIMITER
