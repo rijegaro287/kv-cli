@@ -310,7 +310,7 @@ static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
   }
 
   uint8_t *key = cmd_ptr->param_1;
-  db_entry_t *entry = get_entry_by_key(cli_db->db, key);
+  db_entry_t *entry = get_entry(cli_db->db, key);
   if (entry ==  NULL) {
     logger(4, "Error: Failed to get entry with key: \"%s\"\n", key);
     return -1;

@@ -1,11 +1,9 @@
-int64:key4=11221
-int32:key3=4121
-int16:key2=134
-int8:key1=12
-float:key6=5.7570000
 double:key7=4.200000000000000
-string:key5="Hola 1"
+int64:key12=6777
 int8:key15=2
 int64:keyyyy=129
-int64:key12=12
 bool:keybool=false
+int8:key1=12
+int16:key2=134
+int64:key4=11221
+string:key5="Hola 1"

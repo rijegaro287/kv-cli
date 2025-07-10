@@ -39,20 +39,18 @@ extern db_t *create_db(uint8_t *storage_type) {
 
   if(strcmp(storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     db->storage = create_list();
-    if (db->storage == NULL) {
-      logger(3, "Error: Failed to create list storage\n");
-      free(db);
-      return NULL;
-    }
+
   }
   else if(strcmp(storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    free(db);
-    return NULL;
+    db->storage = create_hash_table(KV_STORAGE_HASH_SIZE);
   }
   else {
-    logger(3, "Error: Invalid storage structure\n");
-    free(db);
+    db->storage = NULL;
+  }
+
+  if (db->storage == NULL) {
+    logger(3, "Error: Failed to create storage structure\n");
+    free_db(db);
     return NULL;
   }
 
@@ -105,8 +103,7 @@ extern int64_t save_db(db_t *db, uint8_t *file_path) {
     result = list_save(new_file, (list_t*)db->storage);
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    result = -1;
+    result = hash_save(new_file, (hash_table_t*)db->storage);
   }
   else {
     logger(3, "Error: Invalid storage structure\n");
@@ -127,113 +124,103 @@ extern int64_t save_db(db_t *db, uint8_t *file_path) {
 }
 
 extern int64_t insert_entry(db_t *db, db_entry_t *entry) {
+  int64_t result;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    if (list_insert((list_t*)db->storage, entry) < 0) {
-      logger(3, "Error: Failed to insert entry into list");
-      return -1;
-    }
-    return 0;
+    result = list_insert((list_t*)db->storage, entry);
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    return -1;
+    result = hash_insert((hash_table_t*)db->storage, entry);
   }
   else {
     logger(3, "Error: Invalid storage structure\n");
-    return -1;
+    result = -1;
   }
+
+  if (result < 0) {
+    logger(3, "Error: Failed to insert entry to storage\n");
+  }
+
+  return result;
 }
 
 extern int64_t put_entry(db_t *db, uint8_t *key, uint8_t *value, uint8_t *type) {
+  uint64_t result;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    if (list_put(db->storage, key, value, type) < 0) {
-      logger(3, "Error: Failed to put entry into list\n");
-      return -1;
-    }
-    return 0;
+    result = list_put((list_t*)db->storage, key, value, type);
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    return -1;
+    result = hash_put((hash_table_t*)db->storage, key, value, type);
   }
   else {
     logger(3, "Error: Invalid storage structure\n");
-    return -1;
+    result = -1;
   }
+
+  if (result < 0) {
+    logger(3, "Error: Failed to put entry into storage\n");
+  }
+
+  return result;
 }
 
 extern int64_t delete_entry(db_t *db, uint8_t *key) {
+  uint64_t result;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    if (list_delete(db->storage, key) < 0) {
-      logger(3, "Error: Failed to delete entry\n");
-      return -1;
-    }
+    result = list_delete((list_t*)db->storage, key);
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    return -1;
+    result = hash_delete((hash_table_t*)db->storage, key);
   }
   else {
     logger(3, "Error: Invalid storage structure\n");
-    return -1;
+    result = -1;
   }
-  return 0;
+
+  if (result < 0) {
+    logger(3, "Error: Failed to delete an entry from storage\n");
+  }
+
+  return result;
 }
 
-extern db_entry_t* get_entry_by_idx(db_t *db, uint64_t idx) {
-  db_entry_t *entry;
-  if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    entry = list_get_entry_by_idx((list_t*)db->storage, idx);
-    if (entry == NULL) {
-      logger(3, "Error: Failed to insert entry into list\n");
-      return NULL;
-    }
-  }
-  else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    return NULL;
-  }
-  else {
-    logger(3, "Error: Invalid storage structure\n");
-    return NULL;
-  }
-  return entry;
-}
-
-extern db_entry_t* get_entry_by_key(db_t *db, uint8_t *key) {
+extern db_entry_t* get_entry(db_t *db, uint8_t *key) {
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_entry_by_key((list_t*)db->storage, key);
-    if (entry == NULL) {
-      logger(3, "Error: Failed to insert entry into list\n");
-      return NULL;
-    }
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
-    return NULL;
+    entry = hash_get_entry((hash_table_t*)db->storage, key);
   }
   else {
     logger(3, "Error: Invalid storage structure\n");
-    return NULL;
+    entry = NULL;
   }
+
+  if (entry == NULL) {
+    logger(3, "Error: Failed to get entry from storage\n");
+  }
+
   return entry;
 }
 
 extern void free_db(db_t *db) {
   if (db == NULL) return;
 
+  if (db->storage == NULL) {
+    free(db);
+    return;
+  };
+
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    if (db->storage != NULL) {
-      free_list(db->storage);
-    }
+    free_list((list_t*)db->storage);
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Uninplemented: free hash storage\n");
+    free_hash_table((hash_table_t*)db->storage);
   }
   else {
     free(db->storage);
   }
+
   free(db);
 }
 
@@ -242,7 +229,7 @@ extern void print_db(db_t *db) {
     list_print((list_t*)db->storage);
   }
   else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
-    logger(3, "Unimplemented: Hash Table\n");
+    hash_print((hash_table_t*)db->storage);
   }
   else {
     logger(3, "Error: Invalid storage structure\n");

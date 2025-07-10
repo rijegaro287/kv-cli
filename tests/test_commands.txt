@@ -1,1 +1,2 @@
-load ./tests/data/test.db db1 L
+load ./tests/data/test.db db1 H
+load ./tests/data/test.db db2 L
