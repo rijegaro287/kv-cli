@@ -22,24 +22,23 @@
 
 
 ## Steps
-* Configure CMake ✓
+* ✓ Configure CMake
 * Make a program that can read and write to .db files
-  * Delimiters as constants ✓
-  * Read:
-    * Read line by line ✓
-    * Parse each line into command key and value ✓
-    * Create and object from the parsed information ✓
-    * Load the object into the selected data structure ✓
-  * Write:
-    * Create a format string from an entry object
-    * Decide how to perform updates
-    * Implement atomic write
-* Create the configurable data structure ✓
-* Load the database into the structure ✓
-* Add CLI Loop
-  * Ability to load more than one database into memory ✓
-  * Switch between the loaded ones
-  * put, get, delete from db
+  * ✓ Delimiters as constants
+  * ✓ Read:
+    * ✓ Read line by line
+    * ✓ Parse each line into command key and value
+    * ✓ Create and object from the parsed information
+    * ✓ Load the object into the selected data structure
+  * ✓ Write:
+    * ✓ Create a format string from an entry object
+    * ✓ Implement atomic write
+* ✓ Create the configurable data structure
+* ✓ Load the database into the structure
+* ✓ Add CLI Loop
+  * ✓ Ability to load more than one database into memory
+  * ✓ Switch between the loaded DBs
+  * ✓ put, get, delete from db
 * Static Library
 * Add Tests framework
 
@@ -74,7 +73,6 @@ flowchart LR
 ### CLI Design
 
 #### Main Menu
-* Welcome message
 * \> _waiting for command_: 
   1. ✓ Load a Database from a File
     * ✓ load \<db_path\> \<db_id\> \<storage_type\>
@@ -84,25 +82,24 @@ flowchart LR
      * ✓ Enters another loop that runs commands in the database
   3. ✓ List loaded databases:
      * ✓ list
-  4. Help
-      * help
-  5. Exit
-      * exit
+  4. ✓ Help
+  5. ✓ Exit
+      * ✓ exit
 
 #### Use Console
-* Instructions
 * \> _waiting for command_:
   1. ✓ Allow to apply operations in a DB
-    * ✓ put \<key\> \<value\>
+    * ✓ put \<key\> \<value\> \<type\>
       * ✓ Inserts an entry
       * ✓ Updates the entry if it already exists
     * ✓ get \<key\>
       * ✓ gets a value from the database by key
     * ✓ delete \<key\>
       * ✓ deletes an entry from the database
-    * exit \<action\>
-      * ✓ Exits to the main menu
     * ✓ Every operation to the db must be instantly applied to the file
+  2. ✓ Help
+  3. ✓ Exit
+    * ✓ Exits to the main menu 
 
 ### Known Issues
 * There is no way of entering spaces when saving a string

@@ -34,7 +34,7 @@ extern void start_cli() {
       cmd_result = use_command(cmd_ptr);
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_HELP) == 0) {
-      cmd_result = 0;
+      cmd_result = main_help_command();
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_EXIT) == 0) {
       free_cli_command(cmd_ptr);
@@ -75,6 +75,9 @@ static int64_t start_use(uint64_t db_idx) {
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_DELETE) == 0) {
       cmd_result = delete_command(cli_db, cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_HELP) == 0) {
+      cmd_result = use_help_command();
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_PRINT) == 0) {
       cmd_result = print_command(cli_db);
@@ -232,6 +235,53 @@ static int64_t use_command(cli_cmd_t *cmd_ptr) {
   }
 
   return start_use(db_idx);
+}
+
+static int64_t main_help_command() {
+  logger(4, "List of available commands:\n");
+
+  logger(4, "\t* load <db_path> <db_id> <storage_type>: Loads a database into memory\n");
+  logger(4, "\t\t<db_path>: path to file containing database\n");
+  logger(4, "\t\t<db_id>: alias for the database\n");
+  logger(4, "\t\t<storage_type>: data structure to use for storage\n");
+  logger(4, "\t\t\tL: linked list\n");
+  logger(4, "\t\t\tH: Hash Table\n");
+
+  logger(4, "\t* use <db_id>: Selects a loaded database to apply operations to\n");
+  logger(4, "\t\t<db_id>: alias of the loaded database\n");
+
+  logger(4, "\t* list: Lists loaded databases\n");
+  
+  logger(4, "\t* exit: Exists the application. Closes all databases\n");
+
+  return 0;
+}
+
+static int64_t use_help_command() {
+  logger(4, "List of available commands:\n");
+
+  logger(4, "\t* put <key> <value> <type>: Creates or updates an entry in the database\n");
+  logger(4, "\t\t<key>: Key that identifies the entry\n");
+  logger(4, "\t\t<value>: Value held by the entry\n");
+  logger(4, "\t\t<type>: Type of the value held by the entry\n");
+  logger(4, "\t\t\tint8\n");
+  logger(4, "\t\t\tint16\n");
+  logger(4, "\t\t\tint32\n");
+  logger(4, "\t\t\tint64\n");
+  logger(4, "\t\t\tfloat\n");
+  logger(4, "\t\t\tdouble\n");
+  logger(4, "\t\t\tbool\n");
+  logger(4, "\t\t\tstring\n");
+
+  logger(4, "\t* get <key>: Prints the value of the entry with the given key\n");
+  logger(4, "\t\t<key>: Key that identifies the entry\n");
+  
+  logger(4, "\t* delete <key>: Deletes an entry with the given key\n");
+  logger(4, "\t\t<key>: Key that identifies the entry\n");
+  
+  logger(4, "\t* exit: Exists to the main menu. Stops operating on the current database\n");
+
+  return 0;
 }
 
 static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {

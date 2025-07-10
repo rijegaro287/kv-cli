@@ -1,12 +1,9 @@
 #pragma once
 
-#include <stdint.h>
-#include <string.h>
-
-#include "constants.h"
-#include "logger.h"
 #include "kv_parser.h"
 #include "linked_list.h"
+#include "logger.h"
+#include "constants.h"
 
 typedef struct _db_t {
   uint8_t storage_type[SM_BUFFER_SIZE];

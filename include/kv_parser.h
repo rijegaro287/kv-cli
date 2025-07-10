@@ -1,12 +1,8 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "constants.h"
-#include "logger.h"
 #include "string_conversion.h"
+#include "logger.h"
+#include "constants.h"
 
 #define TYPE_DELIMETER KV_PARSER_TYPE_DELIMITER
 #define KEY_DELIMETER KV_PARSER_KEY_DELIMITER

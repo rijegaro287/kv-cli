@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "logger.h"
 #include "kv_parser.h"
+#include "logger.h"
 
 typedef struct _node_t {
   db_entry_t *entry;

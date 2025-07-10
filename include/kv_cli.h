@@ -1,11 +1,7 @@
 # pragma once
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "logger.h"
 #include "kv_controller.h"
+#include "logger.h"
 
 #define CLI_COMMAND_LOAD "load"
 #define CLI_COMMAND_LIST "list"
@@ -42,6 +38,8 @@ static cli_cmd_t *get_cmd(uint8_t *msg);
 static int64_t load_command(cli_cmd_t *cmd_ptr);
 static int64_t list_command(cli_cmd_t *cmd_ptr);
 static int64_t use_command(cli_cmd_t *cmd_ptr);
+static int64_t main_help_command();
+static int64_t use_help_command();
 static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
 static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
 static int64_t delete_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
