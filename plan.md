@@ -15,15 +15,15 @@
 2. Make a CLI Tool to manage a database (CLI Tool)
   * ✓ Correct format is \<command\> \<param_1\> \<param_2\> \<param_3\>
 
-  * Loads multiple files into memory using different data structures:
-    * load \<db_path\> \<db_id\> \<storage_type\>
-      * Checks uniqueness of db_path
+  * ✓ Loads multiple files into memory using different data structures:
+    * ✓ load \<db_path\> \<db_id\> \<storage_type\>
+      * ✓ Checks uniqueness of db_path
       * ✓ Checks uniqueness of db_id
     * ✓ A Hash Table
     * ✓ A Linked List
 
-  * Reloads a database using another data structure
-      reload \<db_id\> \<storage_type\>
+  * ✓ Reloads a database using another data structure
+      ✓ reload \<db_id\> \<storage_type\>
   
   * ✓ List all loaded databases and their path
 

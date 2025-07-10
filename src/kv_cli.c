@@ -182,6 +182,11 @@ static int64_t load_command(cli_cmd_t *cmd_ptr) {
       logger(4, "Error: Database with id \"%s\" already exists\n", cli_db->id);
       return -1;
     }
+  
+    if (strcmp(cli_db->path, path) == 0) {
+      logger(4, "Error: Database with path \"%s\" already exists\n", cli_db->path);
+      return -1;
+    }
   }
 
   logger(4, "- Loading database from path: %s as \"%s\"\n ", path, id);
