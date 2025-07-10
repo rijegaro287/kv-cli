@@ -27,11 +27,11 @@ extern void start_cli() {
     if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LOAD) == 0) {
       cmd_result = load_command(cmd_ptr);
     }
-    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_USE) == 0) {
-      cmd_result = use_command(cmd_ptr);
-    }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LIST) == 0) {
       cmd_result = list_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_USE) == 0) {
+      cmd_result = use_command(cmd_ptr);
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_HELP) == 0) {
       cmd_result = 0;
@@ -71,7 +71,7 @@ static int64_t start_use(uint64_t db_idx) {
       cmd_result = put_command(cli_db, cmd_ptr);
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_GET) == 0) {
-      cmd_result = -1;
+      cmd_result = get_command(cli_db, cmd_ptr);
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_DELETE) == 0) {
       cmd_result = -1;
@@ -246,6 +246,24 @@ static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
     logger(4, "Error: Failed to put entry with key \"%s\"\n", key);
     return -1;
   }
+
+  return 0;
+}
+
+static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (strlen(cmd_ptr->param_1) <= 0) {
+    logger(4, "Error: \"get\" requires one parameter: get <key>\n");
+    return -1;
+  }
+
+  uint8_t *key = cmd_ptr->param_1;
+  db_entry_t *entry = get_entry_by_key(cli_db->db, key);
+  if (entry ==  NULL) {
+    logger(4, "Error: Failed to get entry with key: \"%s\"\n", key);
+    return -1;
+  }
+
+  print_entry(entry);
 
   return 0;
 }

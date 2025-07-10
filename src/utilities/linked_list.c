@@ -98,7 +98,7 @@ extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* typ
   return 0;
 }
 
-extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
+extern db_entry_t *list_get_entry_by_idx(list_t* list, uint64_t idx) {
   if (idx >= list->size) {
     logger(3, "Index %d out of range for list\n", idx);
     return NULL;
@@ -115,7 +115,7 @@ extern db_entry_t *list_get_by_idx(list_t* list, uint64_t idx) {
   return NULL;
 }
 
-extern db_entry_t *list_get_by_key(list_t* list, uint8_t *key) {
+extern db_entry_t *list_get_entry_by_key(list_t* list, uint8_t *key) {
   node_t* current_node = list->head;
   while (current_node != NULL) {
     if (strcmp(current_node->entry->key, key) == 0) {
@@ -175,7 +175,7 @@ extern void list_print(list_t* list) {
   }
 
   for (uint64_t i = 0; i < list->size; i++) {
-    db_entry_t *entry = list_get_by_idx(list, i);
+    db_entry_t *entry = list_get_entry_by_idx(list, i);
     if(entry == NULL) {
       logger(3, "Error: Entry not found\n");
       return;

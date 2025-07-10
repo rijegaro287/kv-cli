@@ -8,8 +8,8 @@
 #include "kv_controller.h"
 
 #define CLI_COMMAND_LOAD "load"
-#define CLI_COMMAND_USE "use"
 #define CLI_COMMAND_LIST "list"
+#define CLI_COMMAND_USE "use"
 #define CLI_COMMAND_HELP "help"
 #define CLI_COMMAND_EXIT "exit"
 
@@ -43,6 +43,7 @@ static int64_t load_command(cli_cmd_t *cmd_ptr);
 static int64_t list_command(cli_cmd_t *cmd_ptr);
 static int64_t use_command(cli_cmd_t *cmd_ptr);
 static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
+static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
 extern void free_cli_command(cli_cmd_t *cmd_ptr);
 extern void free_cli_db(cli_db_t *cli_db);
 static int64_t print_command(cli_db_t *cli_db);

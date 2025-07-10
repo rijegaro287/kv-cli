@@ -100,10 +100,10 @@ extern int64_t put_entry(db_t *db, uint8_t *key, uint8_t *value, uint8_t *type) 
   }
 }
 
-extern db_entry_t *get_by_idx(db_t *db, uint64_t idx) {
+extern db_entry_t *get_entry_by_idx(db_t *db, uint64_t idx) {
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    entry = list_get_by_idx((list_t*)db->storage, idx);
+    entry = list_get_entry_by_idx((list_t*)db->storage, idx);
     if (entry == NULL) {
       logger(3, "Error: Failed to insert entry into list\n");
       return NULL;
@@ -120,10 +120,10 @@ extern db_entry_t *get_by_idx(db_t *db, uint64_t idx) {
   return entry;
 }
 
-extern db_entry_t *get_by_key(db_t *db, uint8_t *key) {
+extern db_entry_t *get_entry_by_key(db_t *db, uint8_t *key) {
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
-    entry = list_get_by_key((list_t*)db->storage, key);
+    entry = list_get_entry_by_key((list_t*)db->storage, key);
     if (entry == NULL) {
       logger(3, "Error: Failed to insert entry into list\n");
       return NULL;
