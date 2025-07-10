@@ -100,6 +100,24 @@ extern int64_t put_entry(db_t *db, uint8_t *key, uint8_t *value, uint8_t *type) 
   }
 }
 
+extern int64_t delete_entry(db_t *db, uint8_t *key) {
+  if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    if (list_delete(db->storage, key) < 0) {
+      logger(3, "Error: Failed to delete entry\n");
+      return -1;
+    }
+  }
+  else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
+    logger(3, "Unimplemented: Hash Table\n");
+    return -1;
+  }
+  else {
+    logger(3, "Error: Invalid storage structure\n");
+    return -1;
+  }
+  return 0;
+}
+
 extern db_entry_t *get_entry_by_idx(db_t *db, uint64_t idx) {
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {

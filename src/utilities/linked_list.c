@@ -98,6 +98,22 @@ extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* typ
   return 0;
 }
 
+extern int64_t list_delete(list_t* list, uint8_t *key) {
+  node_t* previous_node = NULL;
+  node_t* current_node = list->head;
+  while (current_node != NULL) {
+    if (strcmp(current_node->entry->key, key) == 0) {
+      previous_node->next = current_node->next;
+      free_node(current_node);
+      list->size--;
+      return 0;
+    }
+    previous_node = current_node;
+    current_node = current_node->next;
+  }
+  return -1;
+}
+
 extern db_entry_t *list_get_entry_by_idx(list_t* list, uint64_t idx) {
   if (idx >= list->size) {
     logger(3, "Index %d out of range for list\n", idx);
@@ -126,29 +142,13 @@ extern db_entry_t *list_get_entry_by_key(list_t* list, uint8_t *key) {
   return NULL;
 }
 
-// extern void list_delete(list_t* list, uint64_t idx) {
-//   if (idx >= list->size) {
-//     printf("Index %d out of range for list", idx);
-//     return;
-//   }
-  
-//   uint64_t current_idx = 0;
-//   node_t* prev_node;
-//   node_t* current_node = list->head;
-//   while (current_node != NULL) {
-//     if (current_idx == idx) {
-//       prev_node->next = current_node->next;
-//       list->size--;
-//       free(current_node);
-//       break;
-//     }
-//     current_idx++;
-//     prev_node = current_node;
-//     current_node = current_node->next;
-//   }
-// }
+extern void free_node(node_t *node) {
+  if (node == NULL) return;
+  free_entry(node->entry);
+  free(node);
+}
 
-extern void free_list(list_t* list) {
+extern void free_list(list_t *list) {
   if (list == NULL) return;
 
   if (list->head == NULL) {
@@ -160,15 +160,14 @@ extern void free_list(list_t* list) {
   node_t *next_node;
   while (current_node != NULL) {
     next_node = current_node->next;
-    free_entry(current_node->entry);
-    free(current_node);
+    free_node(current_node);
     current_node = next_node;
   }
 
   free(list);
 }
 
-extern void list_print(list_t* list) {
+extern void list_print(list_t *list) {
   if (list->size == 0) {
     logger(3, "Linked list is empty\n");
     return;
@@ -180,7 +179,6 @@ extern void list_print(list_t* list) {
       logger(3, "Error: Entry not found\n");
       return;
     }
-
     print_entry(entry);
   }
 }

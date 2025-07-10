@@ -76,14 +76,14 @@ flowchart LR
 #### Main Menu
 * Welcome message
 * \> _waiting for command_: 
-  1. Load a Database from a File ✓
-    * load \<db_path\> \<db_id\> \<storage_type\> ✓
-    * Must check that the id is not repeated ✓
-  2. Use a loaded database:
-     * use <db_id>
-     * Enters another loop that runs commands in the database
-  3. List loaded databases: ✓
-     * list ✓
+  1. ✓ Load a Database from a File
+    * ✓ load \<db_path\> \<db_id\> \<storage_type\>
+    * ✓ Must check that the id is not repeated
+  2. ✓ Use a loaded database:
+     * ✓ use <db_id>
+     * ✓ Enters another loop that runs commands in the database
+  3. ✓ List loaded databases:
+     * ✓ list
   4. Help
       * help
   5. Exit
@@ -93,19 +93,16 @@ flowchart LR
 * Instructions
 * \> _waiting for command_:
   1. Allow to apply operations in a DB
-    * put \<key\> \<value\> ✓
-      * Inserts an entry ✓
-      * Updates the entry if it already exists ✓
-    * get \<key\>
-      * gets a value from the database by key
-    * delete \<key\>
-      * deletes an entry from the database
+    * ✓ put \<key\> \<value\>
+      * ✓ Inserts an entry
+      * ✓ Updates the entry if it already exists
+    * ✓ get \<key\>
+      * ✓ gets a value from the database by key
+    * ✓ delete \<key\>
+      * ✓ deletes an entry from the database
     * exit \<action\>
-      * Exits to the main menu ✓
-      * Peforms an action on exit
-        * s: saves the changes in the database file
-          * Creates a temporary file .tmp in case the write fails
-        * d: discards the changes and reloads the database from its file
+      * ✓ Exits to the main menu
+      * Saves the changes in the database file on exit
 
 ### Known Issues
 * There is no way of entering spaces when saving a string
