@@ -4,6 +4,7 @@
 #include "logger.h"
 
 #define CLI_COMMAND_LOAD "load"
+#define CLI_COMMAND_RELOAD "reload"
 #define CLI_COMMAND_LIST "list"
 #define CLI_COMMAND_USE "use"
 #define CLI_COMMAND_HELP "help"
@@ -36,6 +37,7 @@ extern void start_cli();
 static int64_t start_use(uint64_t db_idx);
 static cli_cmd_t *get_cmd(uint8_t *msg);
 static int64_t load_command(cli_cmd_t *cmd_ptr);
+static int64_t reload_command(cli_cmd_t *cmd_ptr);
 static int64_t list_command(cli_cmd_t *cmd_ptr);
 static int64_t use_command(cli_cmd_t *cmd_ptr);
 static int64_t main_help_command();

@@ -27,6 +27,9 @@ extern void start_cli() {
     if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LOAD) == 0) {
       cmd_result = load_command(cmd_ptr);
     }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_RELOAD) == 0) {
+      cmd_result = reload_command(cmd_ptr);
+    }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LIST) == 0) {
       cmd_result = list_command(cmd_ptr);
     }
@@ -199,6 +202,41 @@ static int64_t load_command(cli_cmd_t *cmd_ptr) {
   db_count++;
 
   return 0;
+}
+
+static int64_t reload_command(cli_cmd_t *cmd_ptr) {
+  if (strlen(cmd_ptr->param_1) <= 0 ||
+      strlen(cmd_ptr->param_2) <= 0) {
+    logger(4, "\"reload\" requires two parameters: reload <db_id> <storage_type>\n");
+    return -1;
+  }
+
+  uint8_t *id = cmd_ptr->param_1;
+  uint8_t *storage_type = cmd_ptr->param_2;
+
+  for (uint64_t i = 0; i < db_count; i++) {
+    cli_db_t *cli_db = db_list[i];
+    
+    if (strcmp(cli_db->id, id) != 0) continue;
+    
+    logger(4, "- Reloading database from path: %s as \"%s\"\n ", cli_db->path, storage_type);
+
+    cli_db_t *new_cli_db = create_cli_db(cli_db->path, id, storage_type);
+    if (new_cli_db == NULL) {
+      logger(3, "Error: Failed to create db instance\n");
+      return -1;
+    }
+
+    if (load_db(new_cli_db->db, new_cli_db->path) < 0) {
+      logger(3, "Error: Failed to load db into memory\n");
+      free_cli_db(new_cli_db);
+      return -1;
+    }
+
+    db_list[i] = new_cli_db;
+    free_cli_db(cli_db);
+  }
+
 }
 
 static int64_t list_command(cli_cmd_t *cmd_ptr) {

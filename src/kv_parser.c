@@ -103,9 +103,9 @@ static int64_t set_string_value(db_entry_t *dest, uint8_t *str_value) {
 }
 
 extern int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
-  void *prev_value = NULL;
   if (dest->value != NULL) {
-    prev_value = dest->value;
+    free(dest->value);
+    dest->value = NULL;
   }
 
   int64_t result = -1;
@@ -144,10 +144,6 @@ extern int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
     return -1;
   }
 
-  if (prev_value != NULL) {
-    free(prev_value);
-  }
-
   return result;
 }
 
@@ -159,12 +155,12 @@ extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
   }
   
   entry->type = map_datatype_from_str(type);
+  entry->value = NULL;
   strncpy(entry->key, key, SM_BUFFER_SIZE);
   if (set_entry_value(entry, value) < 0) {
     logger(3, "Error: Failed to create entry with key \"%s\"\n", key);
     return NULL;
   }
-
 
   if (entry->type < 0 ||
       entry->key == NULL ||
