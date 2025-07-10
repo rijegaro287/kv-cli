@@ -51,34 +51,10 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
   return 0;
 }
 
-extern db_entry_t* list_find(list_t *list, uint8_t *key) {
-  node_t* current_node = list->head;
-  while (current_node != NULL) {
-    if (strcmp(current_node->entry->key, key) == 0) {
-      return current_node->entry;
-    }
-    current_node = current_node->next;
-  }
-  return NULL;
-}
-
-extern int64_t list_update(db_entry_t *entry, uint8_t* key, uint8_t* value, uint8_t* type) {
-  if (strlen(type) > 0) { 
-    entry->type = map_datatype_from_str(type);
-  }
-
-  if (set_entry_value(entry, value) < 0) {
-    logger(4, "Error: Failed to update entry with key \"%s\"\n", key);
-    return -1;
-  }
-
-  return 0;
-}
-
 extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* type) {
-  db_entry_t *entry = list_find(list, key);
+  db_entry_t *entry = list_get_entry_by_key(list, key);
   if (entry != NULL) {
-    if (list_update(entry, key, value, type)) {
+    if (update_entry(entry, key, value, type)) {
       logger(3, "Error: Failed to update an entry\n");
       return -1;
     }
@@ -103,7 +79,12 @@ extern int64_t list_delete(list_t* list, uint8_t *key) {
   node_t* current_node = list->head;
   while (current_node != NULL) {
     if (strcmp(current_node->entry->key, key) == 0) {
-      previous_node->next = current_node->next;
+      if (current_node == list->head) {
+        list->head = current_node->next;
+      }
+      else {
+        previous_node->next = current_node->next;
+      }
       free_node(current_node);
       list->size--;
       return 0;

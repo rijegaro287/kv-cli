@@ -11,7 +11,8 @@ set(HEADERS
   include/utilities/logger.h
   include/utilities/string_conversion.h
   include/utilities/linked_list.h
-  )
+  include/utilities/hash_table.h
+)
   
   set(SOURCES
   src/main.c
@@ -21,6 +22,7 @@ set(HEADERS
   src/utilities/logger.c
   src/utilities/string_conversion.c
   src/utilities/linked_list.c
+  src/utilities/hash_table.c
 )
 
 add_executable(kv_store ${HEADERS} ${SOURCES})
@@ -32,7 +34,3 @@ target_include_directories(kv_store PRIVATE
 
 file(COPY "${CMAKE_SOURCE_DIR}/tests/data/test.db" 
      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/tests/data/")
-
-
-# Add flag -fno-stack-protector
-# target_compile_options(kv_store PRIVATE -fno-stack-protector)

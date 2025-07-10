@@ -195,6 +195,19 @@ extern db_entry_t* parse_line(uint8_t *line) {
   return entry;
 }
 
+extern int64_t update_entry(db_entry_t *entry, uint8_t* key, uint8_t* value, uint8_t* type) {
+  if (strlen(type) > 0) { 
+    entry->type = map_datatype_from_str(type);
+  }
+
+  if (set_entry_value(entry, value) < 0) {
+    logger(4, "Error: Failed to update entry with key \"%s\"\n", key);
+    return -1;
+  }
+
+  return 0;
+}
+
 extern void parse_entry(db_entry_t *entry, uint8_t *dest, uint64_t max_len) {
   uint8_t type[SM_BUFFER_SIZE];
   uint8_t key[SM_BUFFER_SIZE];
