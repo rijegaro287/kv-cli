@@ -1,5 +1,29 @@
 #include "kv_controller.h"
 
+static int64_t copy_file(uint8_t *file_path, uint8_t *copy_path) {
+  FILE *db_file = fopen(file_path, "r");
+  if (db_file == NULL) {
+    logger(3, "Error: Failed to read original file.\n");
+    fclose(db_file);
+    return -1;
+  }
+
+  FILE *copy_file = fopen(copy_path, "w");
+  if (copy_file == NULL) {
+    logger(3, "Error: Failed to create copy file.\n");
+    fclose(copy_file);
+    return -1;
+  }
+
+  int8_t character;
+  while ((character = getc(db_file)) != EOF) {
+    putc(character, copy_file);
+  }
+
+  fclose(db_file);
+  fclose(copy_file);
+}
+
 extern db_t *create_db(uint8_t *storage_type) {
   if (storage_type == NULL) {
     logger(3, "Error: storage_type parameter is NULL\n");
@@ -11,7 +35,7 @@ extern db_t *create_db(uint8_t *storage_type) {
     logger(3, "Error: Failed to allocate memory for db_t\n");
     return NULL;
   }
-  strncpy(db->storage_type, storage_type, CLI_CMD_BUFFER_SIZE);
+  strncpy(db->storage_type, storage_type, SM_BUFFER_SIZE);
 
   if(strcmp(storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     db->storage = create_list();
@@ -42,8 +66,8 @@ extern int64_t load_db(db_t *db, uint8_t *file_path) {
     return -1;
   }
 
-  uint8_t line_buffer[LINE_BUFFER_SIZE];
-  while (fgets(line_buffer, LINE_BUFFER_SIZE, db_file) != NULL) {
+  uint8_t line_buffer[BG_BUFFER_SIZE];
+  while (fgets(line_buffer, BG_BUFFER_SIZE, db_file) != NULL) {
     db_entry_t *entry = parse_line(line_buffer);
     if (entry == NULL) {
       logger(3, "Error: Failed to create entry object\n");
@@ -62,6 +86,44 @@ extern int64_t load_db(db_t *db, uint8_t *file_path) {
   }
 
   return 0;
+}
+
+extern int64_t save_db(db_t *db, uint8_t *file_path) {
+  uint8_t tmp_path[BG_BUFFER_SIZE];
+  snprintf(tmp_path, BG_BUFFER_SIZE, "%s.tmp", file_path);
+  tmp_path[BG_BUFFER_SIZE - 1] = '\0';
+  
+  FILE *new_file = fopen(tmp_path, "w");
+  if (new_file == NULL) {
+    logger(3, "Error: Failed to create temporary database file.\n");
+    fclose(new_file);
+    return -1;
+  }
+
+  int64_t result;
+  if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
+    result = list_save(new_file, (list_t*)db->storage);
+  }
+  else if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_HASH) == 0) {
+    logger(3, "Unimplemented: Hash Table\n");
+    result = -1;
+  }
+  else {
+    logger(3, "Error: Invalid storage structure\n");
+    result = -1;
+  }
+
+  fclose(new_file);
+  
+  if (result < 0) {
+    logger(3, "Error: Failed to save database to a file");
+  }
+  else {
+    remove(file_path);
+    rename(tmp_path, file_path);
+  }
+  
+  return result;
 }
 
 extern int64_t insert_entry(db_t *db, db_entry_t *entry) {
@@ -118,7 +180,7 @@ extern int64_t delete_entry(db_t *db, uint8_t *key) {
   return 0;
 }
 
-extern db_entry_t *get_entry_by_idx(db_t *db, uint64_t idx) {
+extern db_entry_t* get_entry_by_idx(db_t *db, uint64_t idx) {
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_entry_by_idx((list_t*)db->storage, idx);
@@ -138,7 +200,7 @@ extern db_entry_t *get_entry_by_idx(db_t *db, uint64_t idx) {
   return entry;
 }
 
-extern db_entry_t *get_entry_by_key(db_t *db, uint8_t *key) {
+extern db_entry_t* get_entry_by_key(db_t *db, uint8_t *key) {
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_entry_by_key((list_t*)db->storage, key);

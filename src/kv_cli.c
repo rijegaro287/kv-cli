@@ -8,8 +8,8 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
     free_cli_db(cli_db);
     return NULL;
   }
-  strncpy(cli_db->path, path, LINE_BUFFER_SIZE);
-  strncpy(cli_db->id, id, CLI_CMD_BUFFER_SIZE);
+  strncpy(cli_db->path, path, BG_BUFFER_SIZE);
+  strncpy(cli_db->id, id, SM_BUFFER_SIZE);
   return cli_db;
 }
 
@@ -56,7 +56,7 @@ extern void start_cli() {
 static int64_t start_use(uint64_t db_idx) {
   int64_t cmd_result = -1;
   cli_db_t *cli_db = db_list[db_idx];
-  uint8_t msg[LINE_BUFFER_SIZE];
+  uint8_t msg[BG_BUFFER_SIZE];
   while (true) {
     logger(4, "-----------------------------------------------\n");
     logger(4, "(%s) - Please enter a command (or help)\n", cli_db->id);
@@ -91,18 +91,21 @@ static int64_t start_use(uint64_t db_idx) {
     if (cmd_result < 0) {
       logger(3, "Error: Failed to execute command\n");
     }
+    else {
+      save_db(cli_db->db, cli_db->path);
+    }
 
     free_cli_command(cmd_ptr);
   }
 }
 
 static cli_cmd_t* get_cmd(uint8_t *msg) {
-  uint8_t input_cmd[LINE_BUFFER_SIZE];
+  uint8_t input_cmd[BG_BUFFER_SIZE];
   if (msg != NULL) {
     logger(4, msg);
   }
   logger(4, "> ");
-  if (fgets(input_cmd, LINE_BUFFER_SIZE, stdin) == NULL) {
+  if (fgets(input_cmd, BG_BUFFER_SIZE, stdin) == NULL) {
     logger(3, "Error: Failed to get input from user\n");
     return NULL;
   }
@@ -128,23 +131,23 @@ static cli_cmd_t* get_cmd(uint8_t *msg) {
     return NULL;
   }
   else {
-    strncpy(cmd_ptr->cmd, cmd, CLI_CMD_BUFFER_SIZE);
-    cmd_ptr->cmd[CLI_CMD_BUFFER_SIZE - 1] = '\0';
+    strncpy(cmd_ptr->cmd, cmd, SM_BUFFER_SIZE);
+    cmd_ptr->cmd[SM_BUFFER_SIZE - 1] = '\0';
   }
 
   if (param_1 != NULL) {
-    strncpy(cmd_ptr->param_1, param_1, CLI_CMD_BUFFER_SIZE);
-    cmd_ptr->param_1[CLI_CMD_BUFFER_SIZE - 1] = '\0';
+    strncpy(cmd_ptr->param_1, param_1, SM_BUFFER_SIZE);
+    cmd_ptr->param_1[SM_BUFFER_SIZE - 1] = '\0';
   }
 
   if (param_2 != NULL) {
-    strncpy(cmd_ptr->param_2, param_2, CLI_CMD_BUFFER_SIZE);
-    cmd_ptr->param_2[CLI_CMD_BUFFER_SIZE - 1] = '\0';
+    strncpy(cmd_ptr->param_2, param_2, SM_BUFFER_SIZE);
+    cmd_ptr->param_2[SM_BUFFER_SIZE - 1] = '\0';
   }
 
   if (param_3 != NULL) {
-    strncpy(cmd_ptr->param_3, param_3, CLI_CMD_BUFFER_SIZE);
-    cmd_ptr->param_3[CLI_CMD_BUFFER_SIZE - 1] = '\0';
+    strncpy(cmd_ptr->param_3, param_3, SM_BUFFER_SIZE);
+    cmd_ptr->param_3[SM_BUFFER_SIZE - 1] = '\0';
   }
   
   return cmd_ptr;

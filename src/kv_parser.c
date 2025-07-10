@@ -151,6 +151,32 @@ extern int64_t set_entry_value(db_entry_t *dest, uint8_t *str_value) {
   return result;
 }
 
+extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
+ db_entry_t *entry = malloc(sizeof(db_entry_t));
+  if (entry == NULL) {
+    logger(3, "Error: failed to allocated memory for database entry\n");
+    return NULL;
+  }
+  
+  entry->type = map_datatype_from_str(type);
+  strncpy(entry->key, key, SM_BUFFER_SIZE);
+  if (set_entry_value(entry, value) < 0) {
+    logger(3, "Error: Failed to create entry with key \"%s\"\n", key);
+    return NULL;
+  }
+
+
+  if (entry->type < 0 ||
+      entry->key == NULL ||
+      entry->value == NULL) {
+    logger(3, "Error: Failed to create entry object\n");
+    free_entry(entry);
+    return NULL;
+  }
+
+  return entry;
+}
+
 extern db_entry_t* parse_line(uint8_t *line) {
   if (strcmp(line, "\n") == 0 || line[0] == '#') return NULL;  
   uint8_t *type, *key, *value;
@@ -169,30 +195,21 @@ extern db_entry_t* parse_line(uint8_t *line) {
   return entry;
 }
 
-extern db_entry_t* create_entry(uint8_t *key, uint8_t *value, uint8_t *type) {
- db_entry_t *entry = malloc(sizeof(db_entry_t));
-  if (entry == NULL) {
-    logger(3, "Error: failed to allocated memory for database entry\n");
-    return NULL;
-  }
-  
-  entry->type = map_data_type_str(type);
-  strncpy(entry->key, key, CLI_CMD_BUFFER_SIZE);
-  if (set_entry_value(entry, value) < 0) {
-    logger(3, "Error: Failed to create entry with key \"%s\"\n", key);
-    return NULL;
-  }
+extern void parse_entry(db_entry_t *entry, uint8_t *dest, uint64_t max_len) {
+  uint8_t type[SM_BUFFER_SIZE];
+  uint8_t key[SM_BUFFER_SIZE];
+  uint8_t value[SM_BUFFER_SIZE];
 
+  map_datatype_to_str(entry->type, type, SM_BUFFER_SIZE);
+  strncpy(key, entry->key, SM_BUFFER_SIZE);
+  map_value_to_str(entry->type, entry->value, value, SM_BUFFER_SIZE);
 
-  if (entry->type < 0 ||
-      entry->key == NULL ||
-      entry->value == NULL) {
-    logger(3, "Error: Failed to create entry object\n");
-    free_entry(entry);
-    return NULL;
-  }
-
-  return entry;
+  snprintf(dest, max_len, "%s%s%s%s%s%s", type,
+                                          KV_PARSER_TYPE_DELIMITER,
+                                          key,
+                                          KV_PARSER_KEY_DELIMITER,
+                                          value,
+                                          KV_PARSER_VALUE_DELIMITER);
 }
 
 extern void free_entry(db_entry_t *entry) {
@@ -205,48 +222,37 @@ extern void free_entry(db_entry_t *entry) {
 }
 
 extern void print_entry(db_entry_t *entry) {
+  uint8_t type[SM_BUFFER_SIZE];
+  map_datatype_to_str(entry->type, type, SM_BUFFER_SIZE);
+
+  logger(4, "%s\t%s\t", entry->key, type);
+
   switch (entry->type) {
   case INT8_TYPE:
-    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
-                                                entry->key,
-                                                *(uint8_t*)entry->value);
+    logger(4, "%" PRId8 "\n", *(int8_t*)entry->value);
     break;
   case INT16_TYPE:
-    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
-                                                entry->key,
-                                                *(uint16_t*)entry->value);
+    logger(4, "%" PRId16 "\n", *(int16_t*)entry->value);
     break;
   case INT32_TYPE:
-    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
-                                                entry->key,
-                                                *(uint32_t*)entry->value);
+    logger(4, "%" PRId32 "\n", *(int32_t*)entry->value);
     break;
   case INT64_TYPE:
-    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
-                                                entry->key,
-                                                *(uint64_t*)entry->value);
+    logger(4, "%" PRId64 "\n", *(int64_t*)entry->value);
     break;
   case BOOL_TYPE:
-    logger(4, "type: %d, key: %s, value: %d\n", entry->type,
-                                                entry->key,
-                                                *(bool*)entry->value);
+    logger(4, "%s\n", *(bool*)entry->value ? "true" : "false");
     break;
   case FLOAT_TYPE:
-    logger(4, "type: %d, key: %s, value: %f\n", entry->type,
-                                                entry->key,
-                                                *(float*)entry->value);
+    logger(4, "%.7f\n", *(float*)entry->value);
     break;
   case DOUBLE_TYPE:
-    logger(4, "type: %d, key: %s, value: %f\n", entry->type,
-                                                entry->key,
-                                                *(double*)entry->value);
+    logger(4, "%.15lf\n", *(double*)entry->value);
     break;
   case STR_TYPE:
-    logger(4, "type: %d, key: %s, value: %s\n", entry->type,
-                                                entry->key, 
-                                                (uint8_t*)entry->value);
+    logger(4, "%s\n", (uint8_t*)entry->value);
     break;
   default:
-    logger(3, "Error: Invalid Data Type\n");
+    logger(3, "\nError: Invalid Data Type\n");
   }
 }

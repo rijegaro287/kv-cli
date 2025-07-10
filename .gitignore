@@ -2,3 +2,5 @@
 /build
 
 ./notes.md
+
+**/*.tmp

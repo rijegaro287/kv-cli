@@ -19,16 +19,16 @@
 #define CLI_COMMAND_PRINT "print"
 
 typedef struct _cli_db_t {
-  uint8_t path[LINE_BUFFER_SIZE];
-  uint8_t id[CLI_CMD_BUFFER_SIZE];
+  uint8_t path[BG_BUFFER_SIZE];
+  uint8_t id[SM_BUFFER_SIZE];
   db_t *db;
 } cli_db_t;
 
 typedef struct _cli_cmd_t {
-  uint8_t cmd[CLI_CMD_BUFFER_SIZE];
-  uint8_t param_1[CLI_CMD_BUFFER_SIZE];
-  uint8_t param_2[CLI_CMD_BUFFER_SIZE];
-  uint8_t param_3[CLI_CMD_BUFFER_SIZE];
+  uint8_t cmd[SM_BUFFER_SIZE];
+  uint8_t param_1[SM_BUFFER_SIZE];
+  uint8_t param_2[SM_BUFFER_SIZE];
+  uint8_t param_3[SM_BUFFER_SIZE];
 } cli_cmd_t;
 
 static cli_db_t *db_list[KV_CLI_MAX_OPEN_DATABASES];

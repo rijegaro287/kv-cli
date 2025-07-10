@@ -92,7 +92,7 @@ flowchart LR
 #### Use Console
 * Instructions
 * \> _waiting for command_:
-  1. Allow to apply operations in a DB
+  1. ✓ Allow to apply operations in a DB
     * ✓ put \<key\> \<value\>
       * ✓ Inserts an entry
       * ✓ Updates the entry if it already exists
@@ -102,7 +102,7 @@ flowchart LR
       * ✓ deletes an entry from the database
     * exit \<action\>
       * ✓ Exits to the main menu
-      * Saves the changes in the database file on exit
+    * ✓ Every operation to the db must be instantly applied to the file
 
 ### Known Issues
 * There is no way of entering spaces when saving a string

@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "logger.h"
 
@@ -28,7 +29,9 @@ enum ENTRY_VALUE_TYPE {
   STR_TYPE
 };
 
-extern int64_t map_data_type_str(uint8_t *type);
+extern int64_t map_datatype_from_str(uint8_t *type);
+extern void map_datatype_to_str(uint64_t type, uint8_t *dest, uint64_t max_len);
+extern void map_value_to_str(uint64_t type, void *value, uint8_t *dest, uint64_t max_len);
 extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest);
 extern int64_t str_to_float(uint8_t *str_value, float *dest);
 extern int64_t str_to_double(uint8_t *str_value, double *dest);

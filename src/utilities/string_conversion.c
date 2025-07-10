@@ -1,6 +1,6 @@
 #include "string_conversion.h"
 
-extern int64_t map_data_type_str(uint8_t *type) {
+extern int64_t map_datatype_from_str(uint8_t *type) {
   if (strcmp(type, INT8_TYPE_STR) == 0) return INT8_TYPE;
   else if (strcmp(type, INT16_TYPE_STR) == 0) return INT16_TYPE;
   else if (strcmp(type, INT32_TYPE_STR) == 0) return INT32_TYPE;
@@ -13,6 +13,72 @@ extern int64_t map_data_type_str(uint8_t *type) {
     logger(3, "Error: data type %s is not a valid datatype.\n", type);
     return -1;
   }
+}
+
+extern void map_datatype_to_str(uint64_t type, uint8_t *dest, uint64_t max_len) {
+  switch (type) {
+  case INT8_TYPE:
+    strncpy(dest, INT8_TYPE_STR, max_len);
+    break;
+  case INT16_TYPE:
+    strncpy(dest, INT16_TYPE_STR, max_len);
+    break;
+  case INT32_TYPE:
+    strncpy(dest, INT32_TYPE_STR, max_len);
+    break;
+  case INT64_TYPE:
+    strncpy(dest, INT64_TYPE_STR, max_len);
+    break;
+  case FLOAT_TYPE:
+    strncpy(dest, FLOAT_TYPE_STR, max_len);
+    break;
+  case DOUBLE_TYPE:
+    strncpy(dest, DOUBLE_TYPE_STR, max_len);
+    break;
+  case BOOL_TYPE:
+    strncpy(dest, BOOL_TYPE_STR, max_len);
+    break;
+  case STR_TYPE:
+    strncpy(dest, STR_TYPE_STR, max_len);
+    break;
+  default:
+    dest[0] = '\0';
+    return;
+  }
+  dest[max_len - 1] = '\0';
+}
+
+extern void map_value_to_str(uint64_t type, void *value, uint8_t *dest, uint64_t max_len) {
+  switch (type) {
+  case INT8_TYPE:
+    snprintf(dest, max_len, "%" PRId8, *(int8_t*)value);
+    break;
+  case INT16_TYPE:
+    snprintf(dest, max_len, "%" PRId16, *(int16_t*)value);
+    break;
+  case INT32_TYPE:
+    snprintf(dest, max_len, "%" PRId32, *(int32_t*)value);
+    break;
+  case INT64_TYPE:
+    snprintf(dest, max_len, "%" PRId64, *(int64_t*)value);
+    break;
+  case FLOAT_TYPE:
+    snprintf(dest, max_len, "%.7f", *(float*)value);
+    break;
+    case DOUBLE_TYPE:
+    snprintf(dest, max_len, "%.15lf", *(double*)value);
+    break;
+    case BOOL_TYPE:
+    snprintf(dest, max_len, "%s", *(bool*)value ? "true" : "false");
+    break;
+      case STR_TYPE:
+    snprintf(dest, max_len, "%s", (uint8_t*)value);
+    break;
+  default:
+    dest[0] = '\0';
+    return;
+  }
+  dest[max_len - 1] = '\0';
 }
 
 extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest) {

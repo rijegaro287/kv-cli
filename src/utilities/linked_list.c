@@ -64,7 +64,7 @@ extern db_entry_t* list_find(list_t *list, uint8_t *key) {
 
 extern int64_t list_update(db_entry_t *entry, uint8_t* key, uint8_t* value, uint8_t* type) {
   if (strlen(type) > 0) { 
-    entry->type = map_data_type_str(type);
+    entry->type = map_datatype_from_str(type);
   }
 
   if (set_entry_value(entry, value) < 0) {
@@ -140,6 +140,26 @@ extern db_entry_t *list_get_entry_by_key(list_t* list, uint8_t *key) {
     current_node = current_node->next;
   }
   return NULL;
+}
+
+extern int64_t list_save(FILE *file, list_t *list) {
+  node_t *current_node = list->head;
+  while (current_node != NULL) {
+    uint8_t entry_str[BG_BUFFER_SIZE];
+    parse_entry(current_node->entry, entry_str, BG_BUFFER_SIZE);
+    if (strlen(entry_str) == 0) {
+      logger(3, "Error: Failed to parse entry\n");
+      return -1;
+    }
+
+    if (fputs(entry_str, file) == EOF) {
+      logger(3, "Error: Failed to write entry to file\n");
+      return -1;
+    }
+
+    current_node = current_node->next;
+  }
+  return 0;
 }
 
 extern void free_node(node_t *node) {
