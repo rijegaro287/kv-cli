@@ -3,11 +3,22 @@ set(CMAKE_C_STANDARD 23)
 
 project(kv_cli C)
 
-add_subdirectory(lib/logger)
-add_subdirectory(lib/kv_store)
+include(FetchContent)
 
-set(HEADERS include/kv_cli.h
-            include/constants.h)
+FetchContent_Declare(logger
+  GIT_REPOSITORY https://github.com/rijegaro287/logger.git
+  GIT_TAG        origin/main
+)
+
+FetchContent_Declare(kv_store
+GIT_REPOSITORY https://github.com/rijegaro287/kv-store.git
+GIT_TAG        origin/main
+)
+
+FetchContent_MakeAvailable(logger)
+FetchContent_MakeAvailable(kv_store)
+
+set(HEADERS include/kv_cli.h)
   
 set(SOURCES src/main.c
             src/kv_cli.c)
