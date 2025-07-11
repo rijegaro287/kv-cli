@@ -1,6 +1,11 @@
 #include "kv_cli.h"
 
 extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type) {
+  if (path == NULL || id == NULL || storage_type == NULL) {
+    logger(3, "Error: NULL pointer passed to create_cli_db\n");
+    return NULL;
+  }
+  
   cli_db_t *cli_db = malloc(sizeof(cli_db_t));
   cli_db->db = create_db(storage_type);
   if (cli_db->db == NULL) {
@@ -160,6 +165,11 @@ static cli_cmd_t* get_cmd(uint8_t *msg) {
 }
 
 static int64_t load_command(cli_cmd_t *cmd_ptr) {
+  if (cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to load_command\n");
+    return -1;
+  }
+  
   if (db_count >= KV_CLI_MAX_OPEN_DATABASES) {
     logger(4, "Reached max number of open databases. Nothing done\n");
     return -1;
@@ -210,6 +220,11 @@ static int64_t load_command(cli_cmd_t *cmd_ptr) {
 }
 
 static int64_t reload_command(cli_cmd_t *cmd_ptr) {
+  if (cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to reload_command\n");
+    return -1;
+  }
+  
   if (strlen(cmd_ptr->param_1) <= 0 ||
       strlen(cmd_ptr->param_2) <= 0) {
     logger(4, "\"reload\" requires two parameters: reload <db_id> <storage_type>\n");
@@ -240,11 +255,17 @@ static int64_t reload_command(cli_cmd_t *cmd_ptr) {
 
     db_list[i] = new_cli_db;
     free_cli_db(cli_db);
+    return 0;
   }
 
 }
 
 static int64_t list_command(cli_cmd_t *cmd_ptr) {
+  if (cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to list_command\n");
+    return -1;
+  }
+  
   if (db_count == 0) {
     logger(4, "- No databases loaded\n");
     return 0;
@@ -258,6 +279,11 @@ static int64_t list_command(cli_cmd_t *cmd_ptr) {
 }
 
 static int64_t use_command(cli_cmd_t *cmd_ptr) {
+  if (cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to use_command\n");
+    return -1;
+  }
+  
   if (strlen(cmd_ptr->param_1) <= 0) {
     logger(4, "\"use\" requires one parameter: use <db_id>\n");
     return -1;
@@ -328,6 +354,11 @@ static int64_t use_help_command() {
 }
 
 static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (cli_db == NULL || cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to put_command\n");
+    return -1;
+  }
+  
   if (strlen(cmd_ptr->param_1) <= 0 ||
       strlen(cmd_ptr->param_2) <= 0) {
     logger(4, "\"put\" requires two or three parameters: use <key> <value> <data_type (optional)>\n");
@@ -347,6 +378,11 @@ static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
 }
 
 static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (cli_db == NULL || cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to get_command\n");
+    return -1;
+  }
+  
   if (strlen(cmd_ptr->param_1) <= 0) {
     logger(4, "Error: \"get\" requires one parameter: get <key>\n");
     return -1;
@@ -365,6 +401,11 @@ static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
 }
 
 static int64_t delete_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (cli_db == NULL || cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to delete_command\n");
+    return -1;
+  }
+  
   if (strlen(cmd_ptr->param_1) <= 0) {
     logger(4, "Error: \"delete\" requires one parameter: delete <key>\n");
     return -1;
@@ -394,6 +435,11 @@ extern void free_cli_db(cli_db_t* cli_db) {
 }
 
 static int64_t print_command(cli_db_t *cli_db) {
+  if (cli_db == NULL) {
+    logger(3, "Error: NULL pointer passed to print_command\n");
+    return -1;
+  }
+  
   print_db(cli_db->db);
   return 0;
 }

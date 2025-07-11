@@ -1,6 +1,11 @@
 #include "string_conversion.h"
 
 extern int64_t map_datatype_from_str(uint8_t *type) {
+  if (type == NULL) {
+    logger(3, "Error: type parameter is NULL\n");
+    return -1;
+  }
+
   if (strcmp(type, INT8_TYPE_STR) == 0) return INT8_TYPE;
   else if (strcmp(type, INT16_TYPE_STR) == 0) return INT16_TYPE;
   else if (strcmp(type, INT32_TYPE_STR) == 0) return INT32_TYPE;
@@ -16,6 +21,11 @@ extern int64_t map_datatype_from_str(uint8_t *type) {
 }
 
 extern void map_datatype_to_str(uint64_t type, uint8_t *dest, uint64_t max_len) {
+  if (dest == NULL) {
+    logger(3, "Error: dest parameter is NULL\n");
+    return -1;
+  }
+
   switch (type) {
   case INT8_TYPE:
     strncpy(dest, INT8_TYPE_STR, max_len);
@@ -49,6 +59,15 @@ extern void map_datatype_to_str(uint64_t type, uint8_t *dest, uint64_t max_len) 
 }
 
 extern void map_value_to_str(uint64_t type, void *value, uint8_t *dest, uint64_t max_len) {
+  if (value == NULL) {
+    logger(3, "Error: value parameter is NULL\n");
+    return -1;
+  }
+  if (dest == NULL) {
+    logger(3, "Error: dest parameter is NULL\n");
+    return -1;
+  }
+
   switch (type) {
   case INT8_TYPE:
     snprintf(dest, max_len, "%" PRId8, *(int8_t*)value);
@@ -82,6 +101,15 @@ extern void map_value_to_str(uint64_t type, void *value, uint8_t *dest, uint64_t
 }
 
 extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest) {
+  if (str_value == NULL) {
+    logger(3, "Error: str_value parameter is NULL\n");
+    return -1;
+  }
+  if (dest == NULL) {
+    logger(3, "Error: dest parameter is NULL\n");
+    return -1;
+  }
+
   errno = 0;
   uint8_t *end;
   int64_t int_value = strtoll(str_value, (char**)&end, 10);
@@ -101,6 +129,15 @@ extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest) {
 }
 
 extern int64_t str_to_float(uint8_t *str_value, float *dest) {
+  if (str_value == NULL) {
+    logger(3, "Error: str_value parameter is NULL\n");
+    return -1;
+  }
+  if (dest == NULL) {
+    logger(3, "Error: dest parameter is NULL\n");
+    return -1;
+  }
+
   errno = 0;
   uint8_t *end;
   float float_value = strtof(str_value, (char**)&end);
@@ -120,6 +157,15 @@ extern int64_t str_to_float(uint8_t *str_value, float *dest) {
 }
 
 extern int64_t str_to_double(uint8_t *str_value, double *dest) {
+  if (str_value == NULL) {
+    logger(3, "Error: str_value parameter is NULL\n");
+    return -1;
+  }
+  if (dest == NULL) {
+    logger(3, "Error: dest parameter is NULL\n");
+    return -1;
+  }
+
   errno = 0;
   uint8_t *end;
   double double_value = strtod(str_value, (char**)&end);
@@ -139,10 +185,18 @@ extern int64_t str_to_double(uint8_t *str_value, double *dest) {
 }
 
 extern int64_t str_to_bool(uint8_t *str_value, bool *dest) {
+  if (str_value == NULL) {
+    logger(3, "Error: str_value parameter is NULL\n");
+    return -1;
+  }
+  if (dest == NULL) {
+    logger(3, "Error: dest parameter is NULL\n");
+    return -1;
+  }
+  
   if (strcmp(str_value, "true") == 0) {
     bool bool_value = true;
     memcpy(dest, &bool_value, sizeof(bool));
-    return true;
   }
   else if (strcmp(str_value, "false") == 0) {
     bool bool_value = false;
@@ -152,6 +206,5 @@ extern int64_t str_to_bool(uint8_t *str_value, bool *dest) {
     logger(3, "Error: Invalid boolean value %s\n", str_value);
     return -1;
   }
-
   return 0;
 }

@@ -8,7 +8,7 @@ typedef struct _hash_table_t {
   uint64_t size;
 } hash_table_t;
 
-static uint64_t calculate_hash_code(uint8_t *key, uint64_t size);
+static int64_t calculate_hash_code(uint8_t *key, uint64_t size);
 
 extern hash_table_t* create_hash_table(uint64_t size);
 extern int64_t hash_insert(hash_table_t *hash, db_entry_t *entry);

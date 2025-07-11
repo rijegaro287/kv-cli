@@ -14,6 +14,11 @@ extern list_t* create_list() {
 }
 
 extern int64_t list_insert(list_t* list, db_entry_t *entry) {
+  if (list == NULL || entry == NULL) {
+    logger(3, "Error: NULL pointer passed to list_insert\n");
+    return -1;
+  }
+  
   node_t* new_node = malloc(sizeof(node_t));
   if (new_node == NULL) {
     logger(3, "Error: Failed to allocated memory for a node.\n");
@@ -52,6 +57,11 @@ extern int64_t list_insert(list_t* list, db_entry_t *entry) {
 }
 
 extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* type) {
+  if (list == NULL || key == NULL || value == NULL || type == NULL) {
+    logger(3, "Error: NULL pointer passed to list_put\n");
+    return -1;
+  }
+  
   db_entry_t *entry = list_get_entry_by_key(list, key);
   if (entry != NULL) {
     if (update_entry(entry, key, value, type)) {
@@ -75,6 +85,11 @@ extern int64_t list_put(list_t* list, uint8_t* key, uint8_t* value, uint8_t* typ
 }
 
 extern int64_t list_delete(list_t* list, uint8_t *key) {
+  if (list == NULL || key == NULL) {
+    logger(3, "Error: NULL pointer passed to list_delete\n");
+    return -1;
+  }
+  
   node_t* previous_node = NULL;
   node_t* current_node = list->head;
   while (current_node != NULL) {
@@ -96,6 +111,11 @@ extern int64_t list_delete(list_t* list, uint8_t *key) {
 }
 
 extern db_entry_t *list_get_entry_by_idx(list_t* list, uint64_t idx) {
+  if (list == NULL) {
+    logger(3, "Error: NULL pointer passed to list_get_entry_by_idx\n");
+    return NULL;
+  }
+  
   if (idx >= list->size) {
     logger(3, "Index %d out of range for list\n", idx);
     return NULL;
@@ -113,6 +133,11 @@ extern db_entry_t *list_get_entry_by_idx(list_t* list, uint64_t idx) {
 }
 
 extern db_entry_t *list_get_entry_by_key(list_t* list, uint8_t *key) {
+  if (list == NULL || key == NULL) {
+    logger(3, "Error: NULL pointer passed to list_get_entry_by_key\n");
+    return NULL;
+  }
+  
   node_t* current_node = list->head;
   while (current_node != NULL) {
     if (strcmp(current_node->entry->key, key) == 0) {
@@ -124,6 +149,11 @@ extern db_entry_t *list_get_entry_by_key(list_t* list, uint8_t *key) {
 }
 
 extern int64_t list_save(FILE *file, list_t *list) {
+  if (file == NULL || list == NULL) {
+    logger(3, "Error: NULL pointer passed to list_save\n");
+    return -1;
+  }
+  
   node_t *current_node = list->head;
   while (current_node != NULL) {
     uint8_t entry_str[BG_BUFFER_SIZE];
@@ -169,6 +199,11 @@ extern void free_list(list_t *list) {
 }
 
 extern void list_print(list_t *list) {
+  if (list == NULL) {
+    logger(3, "Error: NULL pointer passed to list_print\n");
+    return;
+  }
+  
   if (list->size == 0) {
     logger(3, "Linked list is empty\n");
     return;

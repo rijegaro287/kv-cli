@@ -11,7 +11,6 @@ typedef struct _db_t {
   void *storage;
 } db_t;
 
-static int64_t copy_file(uint8_t *file_path, uint8_t *copy_path);
 extern db_t* create_db(uint8_t *storage_type);
 extern int64_t load_db(db_t *db, uint8_t *file_path);
 extern int64_t save_db(db_t *db, uint8_t *file_path);

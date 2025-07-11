@@ -1,29 +1,5 @@
 #include "kv_controller.h"
 
-static int64_t copy_file(uint8_t *file_path, uint8_t *copy_path) {
-  FILE *db_file = fopen(file_path, "r");
-  if (db_file == NULL) {
-    logger(3, "Error: Failed to read original file.\n");
-    fclose(db_file);
-    return -1;
-  }
-
-  FILE *copy_file = fopen(copy_path, "w");
-  if (copy_file == NULL) {
-    logger(3, "Error: Failed to create copy file.\n");
-    fclose(copy_file);
-    return -1;
-  }
-
-  int8_t character;
-  while ((character = getc(db_file)) != EOF) {
-    putc(character, copy_file);
-  }
-
-  fclose(db_file);
-  fclose(copy_file);
-}
-
 extern db_t *create_db(uint8_t *storage_type) {
   if (storage_type == NULL) {
     logger(3, "Error: storage_type parameter is NULL\n");
@@ -58,6 +34,11 @@ extern db_t *create_db(uint8_t *storage_type) {
 }
 
 extern int64_t load_db(db_t *db, uint8_t *file_path) {
+  if (db == NULL || file_path == NULL) {
+    logger(3, "Error: NULL pointer passed to load_db\n");
+    return -1;
+  }
+  
   FILE *db_file = fopen(file_path, "r");
   if (db_file == NULL) {
     logger(3, "Error: Failed to read the database file.\n");
@@ -87,6 +68,11 @@ extern int64_t load_db(db_t *db, uint8_t *file_path) {
 }
 
 extern int64_t save_db(db_t *db, uint8_t *file_path) {
+  if (db == NULL || file_path == NULL) {
+    logger(3, "Error: NULL pointer passed to save_db\n");
+    return -1;
+  }
+  
   uint8_t tmp_path[BG_BUFFER_SIZE];
   snprintf(tmp_path, BG_BUFFER_SIZE, "%s.tmp", file_path);
   tmp_path[BG_BUFFER_SIZE - 1] = '\0';
@@ -124,6 +110,11 @@ extern int64_t save_db(db_t *db, uint8_t *file_path) {
 }
 
 extern int64_t insert_entry(db_t *db, db_entry_t *entry) {
+  if (db == NULL || entry == NULL) {
+    logger(3, "Error: NULL pointer passed to insert_entry\n");
+    return -1;
+  }
+  
   int64_t result;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     result = list_insert((list_t*)db->storage, entry);
@@ -144,6 +135,11 @@ extern int64_t insert_entry(db_t *db, db_entry_t *entry) {
 }
 
 extern int64_t put_entry(db_t *db, uint8_t *key, uint8_t *value, uint8_t *type) {
+  if (db == NULL || key == NULL || value == NULL || type == NULL) {
+    logger(3, "Error: NULL pointer passed to put_entry\n");
+    return -1;
+  }
+  
   uint64_t result;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     result = list_put((list_t*)db->storage, key, value, type);
@@ -164,6 +160,11 @@ extern int64_t put_entry(db_t *db, uint8_t *key, uint8_t *value, uint8_t *type) 
 }
 
 extern int64_t delete_entry(db_t *db, uint8_t *key) {
+  if (db == NULL || key == NULL) {
+    logger(3, "Error: NULL pointer passed to delete_entry\n");
+    return -1;
+  }
+  
   uint64_t result;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     result = list_delete((list_t*)db->storage, key);
@@ -184,6 +185,11 @@ extern int64_t delete_entry(db_t *db, uint8_t *key) {
 }
 
 extern db_entry_t* get_entry(db_t *db, uint8_t *key) {
+  if (db == NULL || key == NULL) {
+    logger(3, "Error: NULL pointer passed to get_entry\n");
+    return NULL;
+  }
+  
   db_entry_t *entry;
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     entry = list_get_entry_by_key((list_t*)db->storage, key);
@@ -225,6 +231,11 @@ extern void free_db(db_t *db) {
 }
 
 extern void print_db(db_t *db) {
+  if (db == NULL) {
+    logger(3, "Error: NULL pointer passed to print_db\n");
+    return;
+  }
+  
   if (strcmp(db->storage_type, KV_STORAGE_STRUCTURE_LIST) == 0) {
     list_print((list_t*)db->storage);
   }
