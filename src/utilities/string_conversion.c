@@ -2,7 +2,7 @@
 
 extern int64_t map_datatype_from_str(uint8_t *type) {
   if (type == NULL) {
-    logger(3, "Error: type parameter is NULL\n");
+    logger(3, "Error: NULL pointer passed to map_datatype_from_str\n");
     return -1;
   }
 
@@ -22,8 +22,8 @@ extern int64_t map_datatype_from_str(uint8_t *type) {
 
 extern void map_datatype_to_str(uint64_t type, uint8_t *dest, uint64_t max_len) {
   if (dest == NULL) {
-    logger(3, "Error: dest parameter is NULL\n");
-    return -1;
+    logger(3, "Error: NULL pointer passed to map_datatype_to_str\n");
+    return;
   }
 
   switch (type) {
@@ -59,13 +59,9 @@ extern void map_datatype_to_str(uint64_t type, uint8_t *dest, uint64_t max_len) 
 }
 
 extern void map_value_to_str(uint64_t type, void *value, uint8_t *dest, uint64_t max_len) {
-  if (value == NULL) {
-    logger(3, "Error: value parameter is NULL\n");
-    return -1;
-  }
-  if (dest == NULL) {
-    logger(3, "Error: dest parameter is NULL\n");
-    return -1;
+  if (value == NULL || dest == NULL) {
+    logger(3, "Error: NULL pointer passed to map_value_to_str\n");
+    return;
   }
 
   switch (type) {
@@ -101,12 +97,8 @@ extern void map_value_to_str(uint64_t type, void *value, uint8_t *dest, uint64_t
 }
 
 extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest) {
-  if (str_value == NULL) {
-    logger(3, "Error: str_value parameter is NULL\n");
-    return -1;
-  }
-  if (dest == NULL) {
-    logger(3, "Error: dest parameter is NULL\n");
+  if (str_value == NULL || dest == NULL) {
+    logger(3, "Error: NULL pointer passed to str_to_int64\n");
     return -1;
   }
 
@@ -129,12 +121,8 @@ extern int64_t str_to_int64(uint8_t *str_value, int64_t *dest) {
 }
 
 extern int64_t str_to_float(uint8_t *str_value, float *dest) {
-  if (str_value == NULL) {
-    logger(3, "Error: str_value parameter is NULL\n");
-    return -1;
-  }
-  if (dest == NULL) {
-    logger(3, "Error: dest parameter is NULL\n");
+  if (str_value == NULL || dest == NULL) {
+    logger(3, "Error: NULL pointer passed to str_to_float\n");
     return -1;
   }
 
@@ -157,12 +145,8 @@ extern int64_t str_to_float(uint8_t *str_value, float *dest) {
 }
 
 extern int64_t str_to_double(uint8_t *str_value, double *dest) {
-  if (str_value == NULL) {
-    logger(3, "Error: str_value parameter is NULL\n");
-    return -1;
-  }
-  if (dest == NULL) {
-    logger(3, "Error: dest parameter is NULL\n");
+  if (str_value == NULL || dest == NULL) {
+    logger(3, "Error: NULL pointer passed to str_to_double\n");
     return -1;
   }
 
@@ -185,12 +169,8 @@ extern int64_t str_to_double(uint8_t *str_value, double *dest) {
 }
 
 extern int64_t str_to_bool(uint8_t *str_value, bool *dest) {
-  if (str_value == NULL) {
-    logger(3, "Error: str_value parameter is NULL\n");
-    return -1;
-  }
-  if (dest == NULL) {
-    logger(3, "Error: dest parameter is NULL\n");
+  if (str_value == NULL || dest == NULL) {
+    logger(3, "Error: NULL pointer passed to str_to_bool\n");
     return -1;
   }
   
