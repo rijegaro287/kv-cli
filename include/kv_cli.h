@@ -1,7 +1,6 @@
 # pragma once
 
 #include "kv_controller.h"
-#include "logger.h"
 
 #define CLI_COMMAND_LOAD "load"
 #define CLI_COMMAND_RELOAD "reload"

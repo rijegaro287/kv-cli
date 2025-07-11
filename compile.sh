@@ -6,4 +6,4 @@ cmake ..
 make
 
 cd ..
-./build/kv_store
+./build/kv_cli

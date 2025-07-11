@@ -1,36 +1,23 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_STANDARD 23)
 
-project(kv_store C)
+project(kv_cli C)
 
-set(HEADERS
-  include/constants.h
-  include/kv_parser.h
-  include/kv_controller.h
-  include/kv_cli.h
-  include/utilities/logger.h
-  include/utilities/string_conversion.h
-  include/utilities/linked_list.h
-  include/utilities/hash_table.h
-)
+add_subdirectory(lib/logger)
+add_subdirectory(lib/kv_store)
+
+set(HEADERS include/kv_cli.h
+            include/constants.h)
   
-  set(SOURCES
-  src/main.c
-  src/kv_parser.c
-  src/kv_controller.c
-  src/kv_cli.c
-  src/utilities/logger.c
-  src/utilities/string_conversion.c
-  src/utilities/linked_list.c
-  src/utilities/hash_table.c
-)
+set(SOURCES src/main.c
+            src/kv_cli.c)
 
-add_executable(kv_store ${HEADERS} ${SOURCES})
+add_executable(kv_cli ${HEADERS} ${SOURCES})
 
-target_include_directories(kv_store PRIVATE 
-  include/
-  include/utilities
-)
+target_include_directories(kv_cli PRIVATE include)
+
+target_link_libraries(kv_cli PRIVATE kv_store)
+target_link_libraries(kv_cli PRIVATE logger)
 
 file(COPY "${CMAKE_SOURCE_DIR}/tests/data/test.db" 
      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/tests/data/")

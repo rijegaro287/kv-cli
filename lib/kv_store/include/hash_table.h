@@ -1,6 +1,5 @@
 #pragma once
 
-#include "kv_parser.h"
 #include "linked_list.h"
 
 typedef struct _hash_table_t {

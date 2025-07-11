@@ -3,8 +3,6 @@
 #include "kv_parser.h"
 #include "linked_list.h"
 #include "hash_table.h"
-#include "logger.h"
-#include "constants.h"
 
 typedef struct _db_t {
   uint8_t storage_type[SM_BUFFER_SIZE];

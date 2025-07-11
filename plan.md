@@ -42,7 +42,10 @@
     * ✓ delete \<key\>
       * ✓ deletes an entry from the database
     * ✓ Every operation to the db must be instantly applied to the file
-   * ✓ Show help - Commands and how to use 
+   * ✓ Show help - Commands and how to use
+
+4. API to use from code
+  * 
 
 * CMake
 * Use unit testing framework

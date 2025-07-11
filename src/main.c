@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "kv_controller.h"
 #include "kv_cli.h"
 
 #include "hash_table.h"
