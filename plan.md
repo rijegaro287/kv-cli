@@ -44,12 +44,10 @@
     * ✓ Every operation to the db must be instantly applied to the file
    * ✓ Show help - Commands and how to use
 
-4. API to use from code
-  * 
-
-* CMake
+4. ✓ CMake
+  * ✓ Create a Static Library for database controller (use in other code)
+  * ✓ Create an executable for the cli (uses the database controller)
 * Use unit testing framework
-* Create a Static Library
 * Automate Tests and the Static Library creation with github actions (???)
 
 ### Known Issues

@@ -5,7 +5,7 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/linked_list.c
             ${CMAKE_CURRENT_SOURCE_DIR}/kv_controller.c
 )
 
-set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/../constants.h
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/constants.h
             ${CMAKE_CURRENT_SOURCE_DIR}/include/kv_parser.h
             ${CMAKE_CURRENT_SOURCE_DIR}/include/kv_controller.h
             ${CMAKE_CURRENT_SOURCE_DIR}/include/string_conversion.h
