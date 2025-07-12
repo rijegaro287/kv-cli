@@ -459,7 +459,6 @@ static void test_reload_command_invalid_inputs() {
   free_db_list();
 }
 
-// list_command tests
 static void test_list_command_valid_no_databases() {
   logger(4, "*** test_list_command_valid_no_databases ***\n");
   cli_cmd_t *cmd;
@@ -506,87 +505,41 @@ static void test_list_command_valid_with_databases() {
   free_db_list();
 }
 
-static void test_list_command_null_cmd_ptr() {
-  logger(4, "*** test_list_command_null_cmd_ptr ***\n");
+static void test_list_command_null_inputs() {
+  logger(4, "*** test_list_command_null_inputs ***\n");
   TEST_ASSERT_EQUAL(-1, list_command(NULL));
 }
 
-// use_command tests
-static void test_use_command_valid_input() {
-  logger(4, "*** test_use_command_valid_input ***\n");
+static void test_use_command_null_inputs() {
+  logger(4, "*** test_use_command_null_inputs ***\n");
+  TEST_ASSERT_EQUAL(-1, use_command(NULL));
+}
+
+static void test_use_command_invalid_inputs() {
+  logger(4, "*** test_use_command_invalid_inputs ***\n");
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
 
-  // Load a database first
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
   cmd = create_command(command);
   TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
   TEST_ASSERT_EQUAL(1, get_db_count());
   free_cli_command(cmd);
-
-  // Now use the database - this will start an interactive session, so we can't fully test it
-  // but we can test parameter validation
-  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_USE, "db1");
-  cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(cmd);
-  // Note: start_use will block waiting for input, so we can't call use_command directly in tests
-  // We can only test the parameter validation part
   
-  free_cli_command(cmd);
-  free_db_list();
-}
-
-static void test_use_command_null_cmd_ptr() {
-  logger(4, "*** test_use_command_null_cmd_ptr ***\n");
-  TEST_ASSERT_EQUAL(-1, use_command(NULL));
-}
-
-static void test_use_command_missing_param_1() {
-  logger(4, "*** test_use_command_missing_param_1 ***\n");
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  snprintf(command, BG_BUFFER_SIZE, "%s", CLI_COMMAND_USE);
-  cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(cmd);
-  TEST_ASSERT_EQUAL(-1, use_command(cmd));
-  free_cli_command(cmd);
-}
-
-static void test_use_command_empty_param_1() {
-  logger(4, "*** test_use_command_empty_param_1 ***\n");
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_USE, "");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, use_command(cmd));
   free_cli_command(cmd);
-}
-
-static void test_use_command_nonexistent_id() {
-  logger(4, "*** test_use_command_nonexistent_id ***\n");
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_USE, "nonexistent");
+  
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_USE, "invalid");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, use_command(cmd));
   free_cli_command(cmd);
-}
 
-// help command tests
-static void test_main_help_command() {
-  logger(4, "*** test_main_help_command ***\n");
-  TEST_ASSERT_GREATER_OR_EQUAL(0, main_help_command());
-}
-
-static void test_use_help_command() {
-  logger(4, "*** test_use_help_command ***\n");
-  TEST_ASSERT_GREATER_OR_EQUAL(0, use_help_command());
+  free_db_list();
 }
 
 // put_command tests
@@ -947,6 +900,18 @@ static void test_print_command_null_cli_db() {
   TEST_ASSERT_EQUAL(-1, print_command(NULL));
 }
 
+// help command tests
+static void test_main_help_command() {
+  logger(4, "*** test_main_help_command ***\n");
+  TEST_ASSERT_GREATER_OR_EQUAL(0, main_help_command());
+}
+
+static void test_use_help_command() {
+  logger(4, "*** test_use_help_command ***\n");
+  TEST_ASSERT_GREATER_OR_EQUAL(0, use_help_command());
+}
+
+
 // free_cli_command tests
 static void test_free_cli_command_valid() {
   logger(4, "*** test_free_cli_command_valid ***\n");
@@ -1041,18 +1006,11 @@ extern int main() {
   // list_command tests
   RUN_TEST(test_list_command_valid_no_databases);
   RUN_TEST(test_list_command_valid_with_databases);
-  RUN_TEST(test_list_command_null_cmd_ptr);
+  RUN_TEST(test_list_command_null_inputs);
   
   // // use_command tests
-  // RUN_TEST(test_use_command_valid_input);
-  // RUN_TEST(test_use_command_null_cmd_ptr);
-  // RUN_TEST(test_use_command_missing_param_1);
-  // RUN_TEST(test_use_command_empty_param_1);
-  // RUN_TEST(test_use_command_nonexistent_id);
-  
-  // // help command tests
-  // RUN_TEST(test_main_help_command);
-  // RUN_TEST(test_use_help_command);
+  RUN_TEST(test_use_command_null_inputs);
+  RUN_TEST(test_use_command_invalid_inputs);
   
   // // put_command tests
   // RUN_TEST(test_put_command_valid_inputs);
@@ -1086,6 +1044,10 @@ extern int main() {
   // RUN_TEST(test_print_command_valid_input);
   // RUN_TEST(test_print_command_null_cli_db);
   
+  // // help command tests
+  // RUN_TEST(test_main_help_command);
+  // RUN_TEST(test_use_help_command);
+
   // // free_cli_command tests
   // RUN_TEST(test_free_cli_command_valid);
   // RUN_TEST(test_free_cli_command_null);
