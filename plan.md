@@ -12,7 +12,7 @@
     * ✓ Create a format string from an entry object
     * ✓ Implement atomic write
 
-2. Make a CLI Tool to manage a database (CLI Tool)
+2. ✓ Make a CLI Tool to manage a database (CLI Tool)
   * ✓ Correct format is \<command\> \<param_1\> \<param_2\> \<param_3\>
 
   * ✓ Loads multiple files into memory using different data structures:
@@ -33,7 +33,7 @@
 
   * ✓ Show help - Commands and how to use
 
-3. Operate on database (CLI Tool)
+3. ✓ Operate on database (CLI Tool)
     * ✓ put \<key\> \<value\> \<type\>
       * ✓ Inserts an entry
       * ✓ Updates the entry if it already exists
@@ -47,38 +47,9 @@
 4. ✓ CMake
   * ✓ Create a Static Library for database controller (use in other code)
   * ✓ Create an executable for the cli (uses the database controller)
-* Use unit testing framework
-* Automate Tests and the Static Library creation with github actions (???)
+* ✓ Use unit testing framework
+  * Unit Test: Parser, Controller, CLI
 
 ### Known Issues
 * There is no way of entering spaces when saving a string
 * put command needs datatype to update value
-
-
-## Architecture
-
-```mermaid --mermaid-flowchart-curve: basis
-flowchart LR
-  t1[.db file]
-  t1@{ shape: text }
-  t2[User Commands]
-  t2@{ shape: text }
-  t1 --> A[Database]
-  A --> |Objects|B[CLI] 
-  B --> |Requests|A 
-  t2 --> B
-```
-
-### Database
-
-```mermaid --mermaid-flowchart-curve: basis
-flowchart LR
-  t1[.db file]
-  t1@{ shape: text }
-  t1 --> B[Parser]
-  B --> |Object| C[Controller]
-  D[Interface] --> |Requests|C
-  C --> |Objects|D
-  E[Data Structure] --> |Objects|C
-  C --> |Requests|E
-```

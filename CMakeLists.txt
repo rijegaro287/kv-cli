@@ -26,10 +26,9 @@ FetchContent_MakeAvailable(unity)
 
 set(HEADERS include/kv_cli.h)
   
-set(SOURCES src/main.c
-            src/kv_cli.c)
+set(SOURCES src/kv_cli.c)
 
-add_executable(kv_cli ${HEADERS} ${SOURCES})
+add_executable(kv_cli ${HEADERS} ${SOURCES} src/main.c)
 
 target_include_directories(kv_cli PRIVATE include)
 
@@ -39,7 +38,7 @@ target_link_libraries(kv_cli PRIVATE kv_store logger)
 set(TEST_CLI ${CMAKE_CURRENT_SOURCE_DIR}/test/test_kv_cli.c
              ${CMAKE_CURRENT_SOURCE_DIR}/test/include/test_kv_cli.h)
 
-add_executable(test_kv_cli ${TEST_CLI} ${HEADERS})
+add_executable(test_kv_cli ${TEST_CLI} ${SOURCES} ${HEADERS})
 
 target_include_directories(test_kv_cli PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
                                                ${CMAKE_CURRENT_SOURCE_DIR}/test/include)
@@ -56,7 +55,3 @@ enable_testing()
 add_test(NAME test_kv_cli 
          COMMAND test_kv_cli
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}) 
-
-# file(COPY "${CMAKE_SOURCE_DIR}/tests/data/test.db" 
-#      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/tests/data/")
-

@@ -6,6 +6,11 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
     return NULL;
   }
   
+  if (strlen(path) == 0 || strlen(id) == 0 || strlen(storage_type) == 0) {
+    logger(3, "Error: Empty string passed to create_cli_db\n");
+    return NULL;
+  }
+  
   cli_db_t *cli_db = malloc(sizeof(cli_db_t));
   cli_db->db = create_db(storage_type);
   if (cli_db->db == NULL) {
