@@ -31,19 +31,21 @@ static cli_db_t *db_list[KV_CLI_MAX_OPEN_DATABASES];
 static uint64_t db_count = 0;
 
 
+extern int64_t get_command_from_user(uint8_t *msg, uint8_t *dest, uint64_t max_len);
 extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type);
+extern cli_cmd_t *create_command(uint8_t *command);
+extern int64_t start_use(uint64_t db_idx);
+extern int64_t load_command(cli_cmd_t *cmd_ptr);
+extern int64_t reload_command(cli_cmd_t *cmd_ptr);
+extern int64_t list_command(cli_cmd_t *cmd_ptr);
+extern int64_t use_command(cli_cmd_t *cmd_ptr);
+extern int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
+extern int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
+extern int64_t delete_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
+extern int64_t print_command(cli_db_t *cli_db);
+extern int64_t main_help_command();
+extern int64_t use_help_command();
+
 extern void start_cli();
-static int64_t start_use(uint64_t db_idx);
-static cli_cmd_t *get_cmd(uint8_t *msg);
-static int64_t load_command(cli_cmd_t *cmd_ptr);
-static int64_t reload_command(cli_cmd_t *cmd_ptr);
-static int64_t list_command(cli_cmd_t *cmd_ptr);
-static int64_t use_command(cli_cmd_t *cmd_ptr);
-static int64_t main_help_command();
-static int64_t use_help_command();
-static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
-static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
-static int64_t delete_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);
-extern void free_cli_command(cli_cmd_t *cmd_ptr);
 extern void free_cli_db(cli_db_t *cli_db);
-static int64_t print_command(cli_db_t *cli_db);
+extern void free_cli_command(cli_cmd_t *cmd_ptr);

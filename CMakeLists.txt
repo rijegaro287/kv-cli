@@ -24,9 +24,9 @@ FetchContent_MakeAvailable(logger)
 FetchContent_MakeAvailable(kv_store)
 FetchContent_MakeAvailable(unity)
 
-set(HEADERS include/kv_cli.h)
+set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/kv_cli.h)
   
-set(SOURCES src/kv_cli.c)
+set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/kv_cli.c)
 
 add_executable(kv_cli ${HEADERS} ${SOURCES} src/main.c)
 
@@ -38,7 +38,7 @@ target_link_libraries(kv_cli PRIVATE kv_store logger)
 set(TEST_CLI ${CMAKE_CURRENT_SOURCE_DIR}/test/test_kv_cli.c
              ${CMAKE_CURRENT_SOURCE_DIR}/test/include/test_kv_cli.h)
 
-add_executable(test_kv_cli ${TEST_CLI} ${SOURCES} ${HEADERS})
+add_executable(test_kv_cli ${TEST_CLI} ${HEADERS} ${SOURCES})
 
 target_include_directories(test_kv_cli PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
                                                ${CMAKE_CURRENT_SOURCE_DIR}/test/include)

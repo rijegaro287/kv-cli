@@ -1,5 +1,21 @@
 #include "kv_cli.h"
 
+
+extern int64_t get_command_from_user(uint8_t *msg, uint8_t *dest, uint64_t max_len) {
+  uint8_t input_cmd[max_len];
+  if (msg != NULL) {
+    logger(4, msg);
+  }
+  logger(4, "> ");
+  if (fgets(input_cmd, max_len, stdin) == NULL) {
+    logger(3, "Error: Failed to get input from user\n");
+    return -1;
+  }
+  input_cmd[strcspn(input_cmd, "\n")] = '\0';
+  strncpy(dest, input_cmd, max_len);
+  return 0;
+}
+
 extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type) {
   if (path == NULL || id == NULL || storage_type == NULL) {
     logger(3, "Error: NULL pointer passed to create_cli_db\n");
@@ -23,57 +39,61 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
   return cli_db;
 }
 
-extern void start_cli() {
-  int64_t cmd_result = -1;
-  while (true) {
-    logger(4, "===============================================\n");
-    cli_cmd_t *cmd_ptr = get_cmd("- Please enter a command (or help)\n");
-    if (cmd_ptr ==  NULL) {
-      logger(3, "Failed to allocated memory for a command\n");
-      cmd_result = -1;
-      continue;
-    }
-
-    if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LOAD) == 0) {
-      cmd_result = load_command(cmd_ptr);
-    }
-    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_RELOAD) == 0) {
-      cmd_result = reload_command(cmd_ptr);
-    }
-    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LIST) == 0) {
-      cmd_result = list_command(cmd_ptr);
-    }
-    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_USE) == 0) {
-      cmd_result = use_command(cmd_ptr);
-    }
-    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_HELP) == 0) {
-      cmd_result = main_help_command();
-    }
-    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_EXIT) == 0) {
-      free_cli_command(cmd_ptr);
-      return;
-    }
-    else {
-      logger(4, "Error: Invalided command provided %s\n", cmd_ptr->cmd);
-      cmd_result = -1;
-    }
-
-    if (cmd_result < 0) {
-      logger(3, "Error: Failed to execute command\n");
-    }
-  
-    free_cli_command(cmd_ptr);
+extern cli_cmd_t *create_command(uint8_t *command) {
+  cli_cmd_t *cmd_ptr = malloc(sizeof(cli_cmd_t));
+  if (cmd_ptr == NULL) {
+    logger(3, "Error: Failed to allocate command memory\n");
+    return NULL;
   }
+  memset(cmd_ptr, 0, sizeof(cli_cmd_t));
+
+  uint8_t *cmd, *param_1, *param_2, *param_3;
+  cmd = strtok(command, " ");
+  param_1 = strtok(NULL, " ");
+  param_2 = strtok(NULL, " ");
+  param_3 = strtok(NULL, "\n");
+
+  if (cmd == NULL) {
+    logger(3, "Error: Invalid command %s\n", command);
+    free_cli_command(cmd_ptr);
+    return NULL;
+  }
+  
+  if (strlen(cmd) > 0){
+    strncpy(cmd_ptr->cmd, cmd, SM_BUFFER_SIZE);
+    cmd_ptr->cmd[SM_BUFFER_SIZE - 1] = '\0';
+  }
+
+  if (param_1 != NULL && strlen(param_1) > 0) {
+    strncpy(cmd_ptr->param_1, param_1, SM_BUFFER_SIZE);
+    cmd_ptr->param_1[SM_BUFFER_SIZE - 1] = '\0';
+  }
+
+  if (param_2 != NULL && strlen(param_2) > 0) {
+    strncpy(cmd_ptr->param_2, param_2, SM_BUFFER_SIZE);
+    cmd_ptr->param_2[SM_BUFFER_SIZE - 1] = '\0';
+  }
+
+  if (param_3 != NULL && strlen(param_3) > 0) {
+    strncpy(cmd_ptr->param_3, param_3, SM_BUFFER_SIZE);
+    cmd_ptr->param_3[SM_BUFFER_SIZE - 1] = '\0';
+  }
+  
+  return cmd_ptr;
 }
 
-static int64_t start_use(uint64_t db_idx) {
-  int64_t cmd_result = -1;
+extern int64_t start_use(uint64_t db_idx) {
   cli_db_t *cli_db = db_list[db_idx];
+  cli_cmd_t *cmd_ptr;
+  uint8_t command[BG_BUFFER_SIZE];
   uint8_t msg[BG_BUFFER_SIZE];
+  snprintf(msg, BG_BUFFER_SIZE, "(%s) - Please enter a command (or help)\n", cli_db->id);
+  
+  int64_t cmd_result = -1;
   while (true) {
     logger(4, "-----------------------------------------------\n");
-    logger(4, "(%s) - Please enter a command (or help)\n", cli_db->id);
-    cli_cmd_t *cmd_ptr = get_cmd(msg);
+    get_command_from_user(msg, command, BG_BUFFER_SIZE);
+    cmd_ptr = create_command(command);
     if (cmd_ptr ==  NULL) {
       logger(3, "Failed to allocated memory for a command\n");
       cmd_result = -1;
@@ -115,61 +135,7 @@ static int64_t start_use(uint64_t db_idx) {
   }
 }
 
-static cli_cmd_t* get_cmd(uint8_t *msg) {
-  uint8_t input_cmd[BG_BUFFER_SIZE];
-  if (msg != NULL) {
-    logger(4, msg);
-  }
-  logger(4, "> ");
-  if (fgets(input_cmd, BG_BUFFER_SIZE, stdin) == NULL) {
-    logger(3, "Error: Failed to get input from user\n");
-    return NULL;
-  }
-
-  input_cmd[strcspn(input_cmd, "\n")] = '\0';
-  
-  cli_cmd_t *cmd_ptr = malloc(sizeof(cli_cmd_t));
-  if (cmd_ptr == NULL) {
-    logger(3, "Error: Failed to allocate command memory\n");
-    return NULL;
-  }
-    memset(cmd_ptr, 0, sizeof(cli_cmd_t));
-
-  uint8_t *cmd, *param_1, *param_2, *param_3;
-  cmd = strtok(input_cmd, " ");
-  param_1 = strtok(NULL, " ");
-  param_2 = strtok(NULL, " ");
-  param_3 = strtok(NULL, "\n");
-
-  if (cmd == NULL) {
-    logger(3, "Error: Invalid command %s\n", input_cmd);
-    free_cli_command(cmd_ptr);
-    return NULL;
-  }
-  else {
-    strncpy(cmd_ptr->cmd, cmd, SM_BUFFER_SIZE);
-    cmd_ptr->cmd[SM_BUFFER_SIZE - 1] = '\0';
-  }
-
-  if (param_1 != NULL) {
-    strncpy(cmd_ptr->param_1, param_1, SM_BUFFER_SIZE);
-    cmd_ptr->param_1[SM_BUFFER_SIZE - 1] = '\0';
-  }
-
-  if (param_2 != NULL) {
-    strncpy(cmd_ptr->param_2, param_2, SM_BUFFER_SIZE);
-    cmd_ptr->param_2[SM_BUFFER_SIZE - 1] = '\0';
-  }
-
-  if (param_3 != NULL) {
-    strncpy(cmd_ptr->param_3, param_3, SM_BUFFER_SIZE);
-    cmd_ptr->param_3[SM_BUFFER_SIZE - 1] = '\0';
-  }
-  
-  return cmd_ptr;
-}
-
-static int64_t load_command(cli_cmd_t *cmd_ptr) {
+extern int64_t load_command(cli_cmd_t *cmd_ptr) {
   if (cmd_ptr == NULL) {
     logger(3, "Error: NULL pointer passed to load_command\n");
     return -1;
@@ -224,7 +190,7 @@ static int64_t load_command(cli_cmd_t *cmd_ptr) {
   return 0;
 }
 
-static int64_t reload_command(cli_cmd_t *cmd_ptr) {
+extern int64_t reload_command(cli_cmd_t *cmd_ptr) {
   if (cmd_ptr == NULL) {
     logger(3, "Error: NULL pointer passed to reload_command\n");
     return -1;
@@ -265,7 +231,7 @@ static int64_t reload_command(cli_cmd_t *cmd_ptr) {
 
 }
 
-static int64_t list_command(cli_cmd_t *cmd_ptr) {
+extern int64_t list_command(cli_cmd_t *cmd_ptr) {
   if (cmd_ptr == NULL) {
     logger(3, "Error: NULL pointer passed to list_command\n");
     return -1;
@@ -283,7 +249,7 @@ static int64_t list_command(cli_cmd_t *cmd_ptr) {
   return 0;
 }
 
-static int64_t use_command(cli_cmd_t *cmd_ptr) {
+extern int64_t use_command(cli_cmd_t *cmd_ptr) {
   if (cmd_ptr == NULL) {
     logger(3, "Error: NULL pointer passed to use_command\n");
     return -1;
@@ -311,7 +277,84 @@ static int64_t use_command(cli_cmd_t *cmd_ptr) {
   return start_use(db_idx);
 }
 
-static int64_t main_help_command() {
+extern int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (cli_db == NULL || cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to put_command\n");
+    return -1;
+  }
+  
+  if (strlen(cmd_ptr->param_1) <= 0 ||
+      strlen(cmd_ptr->param_2) <= 0) {
+    logger(4, "\"put\" requires two or three parameters: use <key> <value> <data_type (optional)>\n");
+    return -1;
+  }
+
+  uint8_t *key = cmd_ptr->param_1;
+  uint8_t *value = cmd_ptr->param_2;
+  uint8_t *type = cmd_ptr->param_3;
+
+  if (put_entry(cli_db->db, key, value, type) < 0) {
+    logger(4, "Error: Failed to put entry with key \"%s\"\n", key);
+    return -1;
+  }
+
+  return 0;
+}
+
+extern int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (cli_db == NULL || cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to get_command\n");
+    return -1;
+  }
+  
+  if (strlen(cmd_ptr->param_1) <= 0) {
+    logger(4, "Error: \"get\" requires one parameter: get <key>\n");
+    return -1;
+  }
+
+  uint8_t *key = cmd_ptr->param_1;
+  db_entry_t *entry = get_entry(cli_db->db, key);
+  if (entry ==  NULL) {
+    logger(4, "Error: Failed to get entry with key: \"%s\"\n", key);
+    return -1;
+  }
+
+  print_entry(entry);
+
+  return 0;
+}
+
+extern int64_t delete_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
+  if (cli_db == NULL || cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to delete_command\n");
+    return -1;
+  }
+  
+  if (strlen(cmd_ptr->param_1) <= 0) {
+    logger(4, "Error: \"delete\" requires one parameter: delete <key>\n");
+    return -1;
+  }
+
+  uint8_t *key = cmd_ptr->param_1;
+  if (delete_entry(cli_db->db, key) < 0) {
+    logger(4, "Error: Failed to delete entry with key: \"%s\"\n", key);
+    return -1;
+  }
+
+  return 0;
+}
+
+extern int64_t print_command(cli_db_t *cli_db) {
+  if (cli_db == NULL) {
+    logger(3, "Error: NULL pointer passed to print_command\n");
+    return -1;
+  }
+  
+  print_db(cli_db->db);
+  return 0;
+}
+
+extern int64_t main_help_command() {
   logger(4, "List of available commands:\n");
 
   logger(4, "\t* load <db_path> <db_id> <storage_type>: Loads a database into memory\n");
@@ -331,7 +374,7 @@ static int64_t main_help_command() {
   return 0;
 }
 
-static int64_t use_help_command() {
+extern int64_t use_help_command() {
   logger(4, "List of available commands:\n");
 
   logger(4, "\t* put <key> <value> <type>: Creates or updates an entry in the database\n");
@@ -358,71 +401,51 @@ static int64_t use_help_command() {
   return 0;
 }
 
-static int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
-  if (cli_db == NULL || cmd_ptr == NULL) {
-    logger(3, "Error: NULL pointer passed to put_command\n");
-    return -1;
-  }
+extern void start_cli() {
+  int64_t cmd_result = -1;
+  while (true) {
+    logger(4, "===============================================\n");
+    cli_cmd_t *cmd_ptr;
+    uint8_t command[BG_BUFFER_SIZE];
+
+    get_command_from_user("- Please enter a command (or help)\n", command, BG_BUFFER_SIZE);
+    cmd_ptr = create_command(command);
+    if (cmd_ptr ==  NULL) {
+      logger(3, "Failed to allocated memory for a command\n");
+      cmd_result = -1;
+      continue;
+    }
+
+    if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LOAD) == 0) {
+      cmd_result = load_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_RELOAD) == 0) {
+      cmd_result = reload_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LIST) == 0) {
+      cmd_result = list_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_USE) == 0) {
+      cmd_result = use_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_HELP) == 0) {
+      cmd_result = main_help_command();
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_EXIT) == 0) {
+      free_cli_command(cmd_ptr);
+      return;
+    }
+    else {
+      logger(4, "Error: Invalided command provided %s\n", cmd_ptr->cmd);
+      cmd_result = -1;
+    }
+
+    if (cmd_result < 0) {
+      logger(3, "Error: Failed to execute command\n");
+    }
   
-  if (strlen(cmd_ptr->param_1) <= 0 ||
-      strlen(cmd_ptr->param_2) <= 0) {
-    logger(4, "\"put\" requires two or three parameters: use <key> <value> <data_type (optional)>\n");
-    return -1;
+    free_cli_command(cmd_ptr);
   }
-
-  uint8_t *key = cmd_ptr->param_1;
-  uint8_t *value = cmd_ptr->param_2;
-  uint8_t *type = cmd_ptr->param_3;
-
-  if (put_entry(cli_db->db, key, value, type) < 0) {
-    logger(4, "Error: Failed to put entry with key \"%s\"\n", key);
-    return -1;
-  }
-
-  return 0;
-}
-
-static int64_t get_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
-  if (cli_db == NULL || cmd_ptr == NULL) {
-    logger(3, "Error: NULL pointer passed to get_command\n");
-    return -1;
-  }
-  
-  if (strlen(cmd_ptr->param_1) <= 0) {
-    logger(4, "Error: \"get\" requires one parameter: get <key>\n");
-    return -1;
-  }
-
-  uint8_t *key = cmd_ptr->param_1;
-  db_entry_t *entry = get_entry(cli_db->db, key);
-  if (entry ==  NULL) {
-    logger(4, "Error: Failed to get entry with key: \"%s\"\n", key);
-    return -1;
-  }
-
-  print_entry(entry);
-
-  return 0;
-}
-
-static int64_t delete_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr) {
-  if (cli_db == NULL || cmd_ptr == NULL) {
-    logger(3, "Error: NULL pointer passed to delete_command\n");
-    return -1;
-  }
-  
-  if (strlen(cmd_ptr->param_1) <= 0) {
-    logger(4, "Error: \"delete\" requires one parameter: delete <key>\n");
-    return -1;
-  }
-
-  uint8_t *key = cmd_ptr->param_1;
-  if (delete_entry(cli_db->db, key) < 0) {
-    logger(4, "Error: Failed to delete entry with key: \"%s\"\n", key);
-    return -1;
-  }
-
-  return 0;
 }
 
 extern void free_cli_command(cli_cmd_t *cmd_ptr) {
@@ -437,14 +460,4 @@ extern void free_cli_db(cli_db_t* cli_db) {
     free_db(cli_db->db);
   }
   free(cli_db);
-}
-
-static int64_t print_command(cli_db_t *cli_db) {
-  if (cli_db == NULL) {
-    logger(3, "Error: NULL pointer passed to print_command\n");
-    return -1;
-  }
-  
-  print_db(cli_db->db);
-  return 0;
 }
