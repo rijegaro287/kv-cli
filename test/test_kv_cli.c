@@ -414,6 +414,66 @@ static void test_load_command_duplicate_path() {
   free_db_list();
 }
 
+static void test_close_command_valid_inputs() {
+  logger(4, "*** test_close_command_valid_inputs ***\n");
+  cli_cmd_t *cmd;
+  uint8_t command[BG_BUFFER_SIZE];
+
+  load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
+  load_and_validate_database("./test/data/test_2.db", "db2", KV_STORAGE_STRUCTURE_HASH, 2);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_CLOSE, "db1");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, close_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+  
+  cli_db_t *remaining_db = get_db_list()[1];
+  if (remaining_db != NULL) {
+    TEST_ASSERT_EQUAL_STRING("db2", remaining_db->id);
+    TEST_ASSERT_EQUAL_STRING("./test/data/test_2.db", remaining_db->path);
+  }
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_CLOSE, "db2");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, close_command(cmd));
+  TEST_ASSERT_EQUAL(0, get_db_count());
+  free_cli_command(cmd);
+
+  free_db_list();
+}
+
+static void test_close_command_null_inputs() {
+  logger(4, "*** test_close_command_null_inputs ***\n");
+  TEST_ASSERT_EQUAL(-1, close_command(NULL));
+}
+
+static void test_close_command_invalid_inputs() {
+  logger(4, "*** test_close_command_invalid_inputs ***\n");
+  cli_cmd_t *cmd;
+  uint8_t command[BG_BUFFER_SIZE];
+
+  load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_CLOSE, "");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_EQUAL(-1, close_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_CLOSE, "invalid");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_EQUAL(-1, close_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  free_db_list();
+}
+
 static void test_reload_command_valid_inputs() {
   logger(4, "*** test_reload_command_valid_inputs ***\n");
   cli_cmd_t *cmd;
@@ -939,6 +999,11 @@ extern int main() {
   RUN_TEST(test_load_command_duplicate_id);
   RUN_TEST(test_load_command_duplicate_path);
   
+  // close_command tests
+  RUN_TEST(test_close_command_valid_inputs);
+  RUN_TEST(test_close_command_null_inputs);
+  RUN_TEST(test_close_command_invalid_inputs);
+
   // reload_command tests
   RUN_TEST(test_reload_command_valid_inputs);
   RUN_TEST(test_reload_command_null_inputs);

@@ -4,6 +4,7 @@
 
 #define CLI_COMMAND_LOAD "load"
 #define CLI_COMMAND_RELOAD "reload"
+#define CLI_COMMAND_CLOSE "close"
 #define CLI_COMMAND_LIST "list"
 #define CLI_COMMAND_USE "use"
 #define CLI_COMMAND_HELP "help"
@@ -39,6 +40,7 @@ extern cli_cmd_t *create_command(uint8_t *command);
 extern int64_t start_use(uint64_t db_idx);
 extern int64_t load_command(cli_cmd_t *cmd_ptr);
 extern int64_t reload_command(cli_cmd_t *cmd_ptr);
+extern int64_t close_command(cli_cmd_t *cmd_ptr);
 extern int64_t list_command(cli_cmd_t *cmd_ptr);
 extern int64_t use_command(cli_cmd_t *cmd_ptr);
 extern int64_t put_command(cli_db_t *cli_db, cli_cmd_t *cmd_ptr);

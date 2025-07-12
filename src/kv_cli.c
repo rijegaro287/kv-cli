@@ -1,5 +1,18 @@
 #include "kv_cli.h"
 
+static void compact_db_list() {
+  uint64_t target_idx = 0;
+  for (uint64_t idx = 0; idx < KV_CLI_MAX_OPEN_DATABASES; idx++) {
+    cli_db_t *tmp = db_list[idx];
+    if (tmp != NULL) {
+      db_list[idx] = db_list[target_idx];
+      db_list[target_idx] = tmp;
+      target_idx++;
+    }
+  }
+}
+
+
 extern cli_db_t **get_db_list() {
   return db_list;
 }
@@ -239,7 +252,34 @@ extern int64_t reload_command(cli_cmd_t *cmd_ptr) {
     free_cli_db(cli_db);
     return 0;
   }
+}
 
+extern int64_t close_command(cli_cmd_t *cmd_ptr) {
+  if (cmd_ptr == NULL) {
+    logger(3, "Error: NULL pointer passed to close_command\n");
+    return -1;
+  }
+  
+  if (strlen(cmd_ptr->param_1) <= 0) {
+    logger(4, "\"close\" requires two parameters: close <db_id>\n");
+    return -1;
+  }
+
+  uint8_t *id = cmd_ptr->param_1;
+
+  for (uint64_t idx = 0; idx < db_count; idx++) {
+    cli_db_t *current_db = db_list[idx];
+    if (strcmp(current_db->id, id) == 0) {
+      free_cli_db(current_db);
+      db_list[idx] = NULL;
+      db_count--;
+      compact_db_list();
+      return 0;
+    }
+  }
+  
+  logger(3, "Error: Failed to find a database with the given id\n");
+  return -1;
 }
 
 extern int64_t list_command(cli_cmd_t *cmd_ptr) {
@@ -432,6 +472,9 @@ extern void start_cli() {
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_RELOAD) == 0) {
       cmd_result = reload_command(cmd_ptr);
+    }
+    else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_CLOSE) == 0) {
+      cmd_result = close_command(cmd_ptr);
     }
     else if (strcmp(cmd_ptr->cmd, CLI_COMMAND_LIST) == 0) {
       cmd_result = list_command(cmd_ptr);

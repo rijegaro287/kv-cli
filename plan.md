@@ -31,8 +31,8 @@
   * ✓ Reloads a database using another data structure
       ✓ reload \<db_id\> \<storage_type\>
 
-  * Closes a loaded database
-    close \<db_id\>
+  * ✓ Closes a loaded database
+    ✓ close \<db_id\>
   
 
 
@@ -53,7 +53,7 @@
   * ✓ Create a Static Library for database controller (use in other code)
   * ✓ Create an executable for the cli (uses the database controller)
 * ✓ Use unit testing framework
-  * Unit Test: Parser, Controller, CLI
+  * ✓ Unit Test: Parser, Controller, CLI
 
 ### Known Issues
 * There is no way of entering spaces when saving a string
