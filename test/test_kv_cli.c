@@ -209,7 +209,7 @@ static void test_create_command_invalid_inputs() {
 
 static void test_load_command_valid_inputs() {
   logger(4, "*** test_load_command_valid_inputs ***\n");
-  cli_db_t *loaded_db;
+  cli_db_t *cli_db;
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
  
@@ -218,26 +218,30 @@ static void test_load_command_valid_inputs() {
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
-  TEST_ASSERT_GREATER_THAN(0, get_db_count());
-  loaded_db = get_db_list()[get_db_count()-1];
-  TEST_ASSERT_EQUAL_STRING("./test/data/test_1.db", loaded_db->path);
-  TEST_ASSERT_EQUAL_STRING("db1", loaded_db->id);
-  TEST_ASSERT_NOT_NULL(loaded_db->db);
-  TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_LIST, loaded_db->db->storage_type);
-  TEST_ASSERT_NOT_NULL(loaded_db->db->storage);
+  TEST_ASSERT_EQUAL(1, get_db_count());
+
+  cli_db = get_db_list()[get_db_count()-1];
+
+  TEST_ASSERT_EQUAL_STRING("./test/data/test_1.db", cli_db->path);
+  TEST_ASSERT_EQUAL_STRING("db1", cli_db->id);
+  TEST_ASSERT_NOT_NULL(cli_db->db);
+  TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_LIST, cli_db->db->storage_type);
+  TEST_ASSERT_NOT_NULL(cli_db->db->storage);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
                     CLI_COMMAND_LOAD, "./test/data/test_2.db", "db2", KV_STORAGE_STRUCTURE_HASH);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
-  TEST_ASSERT_GREATER_THAN(0, get_db_count());
-  loaded_db = get_db_list()[get_db_count()-1];
-  TEST_ASSERT_EQUAL_STRING("./test/data/test_2.db", loaded_db->path);
-  TEST_ASSERT_EQUAL_STRING("db2", loaded_db->id);
-  TEST_ASSERT_NOT_NULL(loaded_db->db);
-  TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_HASH, loaded_db->db->storage_type);
-  TEST_ASSERT_NOT_NULL(loaded_db->db->storage);
+  TEST_ASSERT_EQUAL(2, get_db_count());
+
+  cli_db = get_db_list()[get_db_count()-1];
+
+  TEST_ASSERT_EQUAL_STRING("./test/data/test_2.db", cli_db->path);
+  TEST_ASSERT_EQUAL_STRING("db2", cli_db->id);
+  TEST_ASSERT_NOT_NULL(cli_db->db);
+  TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_HASH, cli_db->db->storage_type);
+  TEST_ASSERT_NOT_NULL(cli_db->db->storage);
 
   free_cli_command(cmd);
   free_db_list();
@@ -302,6 +306,8 @@ static void test_load_command_invalid_inputs() {
   TEST_ASSERT_GREATER_OR_EQUAL(-1, load_command(cmd));
   TEST_ASSERT_EQUAL(0, get_db_count());
   free_cli_command(cmd);
+
+  free_db_list();
 }
 
 static void test_load_command_max_databases_reached() {
@@ -542,377 +548,403 @@ static void test_use_command_invalid_inputs() {
   free_db_list();
 }
 
-// put_command tests
 static void test_put_command_valid_inputs() {
   logger(4, "*** test_put_command_valid_inputs ***\n");
   cli_db_t *cli_db;
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
 
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_PUT, "key1", "value1", STR_TYPE_STR);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "key2", "42", INT32_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "key3", "3.14", FLOAT_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_2.db", "db2", KV_STORAGE_STRUCTURE_HASH);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(2, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "key1", "value1", STR_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "key2", "42", INT32_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "key3", "3.14", FLOAT_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  free_db_list();
 }
 
-static void test_put_command_valid_inputs_without_type() {
-  logger(4, "*** test_put_command_valid_inputs_without_type ***\n");
+static void test_put_command_null_inputs() {
+  logger(4, "*** test_put_command_null_inputs ***\n");
   cli_db_t *cli_db;
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
 
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-
-  snprintf(command, BG_BUFFER_SIZE, "%s %s %s", 
-           CLI_COMMAND_PUT, "key1", "value1");
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
-  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
-  
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
   free_cli_command(cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_put_command_null_cli_db() {
-  logger(4, "*** test_put_command_null_cli_db ***\n");
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_PUT, "key1", "value1", STR_TYPE_STR);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
+
   TEST_ASSERT_EQUAL(-1, put_command(NULL, cmd));
-  free_cli_command(cmd);
-}
-
-static void test_put_command_null_cmd_ptr() {
-  logger(4, "*** test_put_command_null_cmd_ptr ***\n");
-  cli_db_t *cli_db;
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
   TEST_ASSERT_EQUAL(-1, put_command(cli_db, NULL));
-  free_cli_db(cli_db);
-}
-
-static void test_put_command_both_null() {
-  logger(4, "*** test_put_command_both_null ***\n");
   TEST_ASSERT_EQUAL(-1, put_command(NULL, NULL));
-}
-
-static void test_put_command_missing_param_1() {
-  logger(4, "*** test_put_command_missing_param_1 ***\n");
-  cli_db_t *cli_db;
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-
-  snprintf(command, BG_BUFFER_SIZE, "%s %s %s", 
-           CLI_COMMAND_PUT, "value1", STR_TYPE_STR);
-  cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(cmd);
-  TEST_ASSERT_EQUAL(-1, put_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
+
+  free_db_list();
 }
 
-static void test_put_command_missing_param_2() {
-  logger(4, "*** test_put_command_missing_param_2 ***\n");
+static void test_put_command_invalid_inputs() {
+  logger(4, "*** test_put_command_invalid_inputs ***\n");
   cli_db_t *cli_db;
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-
-  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_PUT, "key1");
-  cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(cmd);
-  TEST_ASSERT_EQUAL(-1, put_command(cli_db, cmd));
-  
-  free_cli_command(cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_put_command_empty_params() {
-  logger(4, "*** test_put_command_empty_params ***\n");
-  cli_db_t *cli_db;
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
-           CLI_COMMAND_PUT, "", "", "");
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s",
+           CLI_COMMAND_PUT, "", "value1", STR_TYPE_STR);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, put_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s",
+           CLI_COMMAND_PUT, "key1", "", STR_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_EQUAL(-1, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s",
+           CLI_COMMAND_PUT, "key1", "value1", "");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_EQUAL(-1, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s",
+           CLI_COMMAND_PUT, "key1", "value1", "invalid");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_EQUAL(-1, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  free_db_list();
 }
 
-// get_command tests
-static void test_get_command_valid_input() {
-  logger(4, "*** test_get_command_valid_input ***\n");
+static void test_get_command_valid_inputs() {
+  logger(4, "*** test_get_command_valid_inputs ***\n");
   cli_db_t *cli_db;
-  cli_cmd_t *put_cmd, *get_cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-
-  // First put a value
-  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
-           CLI_COMMAND_PUT, "key1", "value1", STR_TYPE_STR);
-  put_cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(put_cmd);
-  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, put_cmd));
-  free_cli_command(put_cmd);
-
-  // Now get it
-  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "key1");
-  get_cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(get_cmd);
-  TEST_ASSERT_GREATER_OR_EQUAL(0, get_command(cli_db, get_cmd));
-  
-  free_cli_command(get_cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_get_command_null_cli_db() {
-  logger(4, "*** test_get_command_null_cli_db ***\n");
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "testkey", "testvalue", STR_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "testkey");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, get_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_2.db", "db2", KV_STORAGE_STRUCTURE_HASH);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(2, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "testkey", "testvalue", STR_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "testkey");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, get_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  free_db_list();
+}
+
+static void test_get_command_null_inputs() {
+  logger(4, "*** test_get_command_null_inputs ***\n");
+  cli_db_t *cli_db;
+  cli_cmd_t *cmd;
+  uint8_t command[BG_BUFFER_SIZE];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "key1");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, get_command(NULL, cmd));
-  free_cli_command(cmd);
-}
-
-static void test_get_command_null_cmd_ptr() {
-  logger(4, "*** test_get_command_null_cmd_ptr ***\n");
-  cli_db_t *cli_db;
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
   TEST_ASSERT_EQUAL(-1, get_command(cli_db, NULL));
-  free_cli_db(cli_db);
-}
-
-static void test_get_command_both_null() {
-  logger(4, "*** test_get_command_both_null ***\n");
   TEST_ASSERT_EQUAL(-1, get_command(NULL, NULL));
+  free_cli_command(cmd);
+
+  free_db_list();
 }
 
-static void test_get_command_missing_param_1() {
-  logger(4, "*** test_get_command_missing_param_1 ***\n");
+static void test_get_command_invalid_inputs() {
+  logger(4, "*** test_get_command_invalid_inputs ***\n");
   cli_db_t *cli_db;
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
 
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s", CLI_COMMAND_GET);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, get_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_get_command_empty_param_1() {
-  logger(4, "*** test_get_command_empty_param_1 ***\n");
-  cli_db_t *cli_db;
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, get_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_get_command_nonexistent_key() {
-  logger(4, "*** test_get_command_nonexistent_key ***\n");
-  cli_db_t *cli_db;
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "nonexistent");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, get_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
+
+  free_db_list();
 }
 
-// delete_command tests
-static void test_delete_command_valid_input() {
-  logger(4, "*** test_delete_command_valid_input ***\n");
+static void test_delete_command_valid_inputs() {
+  logger(4, "*** test_delete_command_valid_inputs ***\n");
   cli_db_t *cli_db;
-  cli_cmd_t *put_cmd, *delete_cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-
-  // First put a value
-  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
-           CLI_COMMAND_PUT, "key1", "value1", STR_TYPE_STR);
-  put_cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(put_cmd);
-  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, put_cmd));
-  free_cli_command(put_cmd);
-
-  // Now delete it
-  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "key1");
-  delete_cmd = create_command(command);
-  TEST_ASSERT_NOT_NULL(delete_cmd);
-  TEST_ASSERT_GREATER_OR_EQUAL(0, delete_command(cli_db, delete_cmd));
-  
-  free_cli_command(delete_cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_delete_command_null_cli_db() {
-  logger(4, "*** test_delete_command_null_cli_db ***\n");
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "deletekey", "deletevalue", STR_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "deletekey");
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, delete_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  free_db_list();
+}
+
+static void test_delete_command_null_inputs() {
+  logger(4, "*** test_delete_command_null_inputs ***\n");
+  cli_db_t *cli_db;
+  cli_cmd_t *cmd;
+  uint8_t command[BG_BUFFER_SIZE];
+
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "key1");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
+
   TEST_ASSERT_EQUAL(-1, delete_command(NULL, cmd));
-  free_cli_command(cmd);
-}
-
-static void test_delete_command_null_cmd_ptr() {
-  logger(4, "*** test_delete_command_null_cmd_ptr ***\n");
-  cli_db_t *cli_db;
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
   TEST_ASSERT_EQUAL(-1, delete_command(cli_db, NULL));
-  free_cli_db(cli_db);
-}
-
-static void test_delete_command_both_null() {
-  logger(4, "*** test_delete_command_both_null ***\n");
   TEST_ASSERT_EQUAL(-1, delete_command(NULL, NULL));
+  free_cli_command(cmd);
+
+  free_db_list();
 }
 
-static void test_delete_command_missing_param_1() {
-  logger(4, "*** test_delete_command_missing_param_1 ***\n");
+static void test_delete_command_invalid_inputs() {
+  logger(4, "*** test_delete_command_invalid_inputs ***\n");
   cli_db_t *cli_db;
   cli_cmd_t *cmd;
   uint8_t command[BG_BUFFER_SIZE];
 
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s", CLI_COMMAND_DELETE);
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, delete_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
-}
-
-static void test_delete_command_empty_param_1() {
-  logger(4, "*** test_delete_command_empty_param_1 ***\n");
-  cli_db_t *cli_db;
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, delete_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
-}
 
-static void test_delete_command_failed_delete() {
-  logger(4, "*** test_delete_command_failed_delete ***\n");
-  cli_db_t *cli_db;
-  cli_cmd_t *cmd;
-  uint8_t command[BG_BUFFER_SIZE];
-
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-
-  // Try to delete a non-existent key
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "nonexistent");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_EQUAL(-1, delete_command(cli_db, cmd));
-  
   free_cli_command(cmd);
-  free_cli_db(cli_db);
+
+  free_db_list();
 }
 
-// print_command tests
-static void test_print_command_valid_input() {
-  logger(4, "*** test_print_command_valid_input ***\n");
+static void test_print_command_valid_inputs() {
+  logger(4, "*** test_print_command_valid_inputs ***\n");
   cli_db_t *cli_db;
+  cli_cmd_t *cmd;
+  uint8_t command[BG_BUFFER_SIZE];
 
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
   TEST_ASSERT_GREATER_OR_EQUAL(0, print_command(cli_db));
-  free_cli_db(cli_db);
+
+  // Add some data and print again
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_PUT, "printkey", "printvalue", STR_TYPE_STR);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, put_command(cli_db, cmd));
+  free_cli_command(cmd);
+
+  TEST_ASSERT_GREATER_OR_EQUAL(0, print_command(cli_db));
+
+  free_db_list();
 }
 
-static void test_print_command_null_cli_db() {
-  logger(4, "*** test_print_command_null_cli_db ***\n");
+static void test_print_command_null_inputs() {
+  logger(4, "*** test_print_command_null_inputs ***\n");
   TEST_ASSERT_EQUAL(-1, print_command(NULL));
 }
 
-// help command tests
-static void test_main_help_command() {
-  logger(4, "*** test_main_help_command ***\n");
+static void test_main_help_command_valid() {
+  logger(4, "*** test_main_help_command_valid ***\n");
   TEST_ASSERT_GREATER_OR_EQUAL(0, main_help_command());
 }
 
-static void test_use_help_command() {
-  logger(4, "*** test_use_help_command ***\n");
+static void test_use_help_command_valid() {
+  logger(4, "*** test_use_help_command_valid ***\n");
   TEST_ASSERT_GREATER_OR_EQUAL(0, use_help_command());
 }
 
-
-// free_cli_command tests
 static void test_free_cli_command_valid() {
   logger(4, "*** test_free_cli_command_valid ***\n");
   cli_cmd_t *cmd;
@@ -923,48 +955,40 @@ static void test_free_cli_command_valid() {
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   
-  // This should not crash
+  // Should not crash
   free_cli_command(cmd);
 }
 
-static void test_free_cli_command_null() {
-  logger(4, "*** test_free_cli_command_null ***\n");
-  // This should not crash
+static void test_free_cli_command_null_input() {
+  logger(4, "*** test_free_cli_command_null_input ***\n");
+  // Should not crash
   free_cli_command(NULL);
 }
 
-// free_cli_db tests
 static void test_free_cli_db_valid() {
   logger(4, "*** test_free_cli_db_valid ***\n");
   cli_db_t *cli_db;
+  cli_cmd_t *cmd;
+  uint8_t command[BG_BUFFER_SIZE];
 
-  cli_db = create_cli_db("test.db", "testdb", KV_STORAGE_STRUCTURE_LIST);
-  TEST_ASSERT_NOT_NULL(cli_db);
-  
-  // This should not crash
+  snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
+           CLI_COMMAND_LOAD, "./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST);
+  cmd = create_command(command);
+  TEST_ASSERT_NOT_NULL(cmd);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, load_command(cmd));
+  TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
+
+  cli_db = get_db_list()[get_db_count()-1];
+
   free_cli_db(cli_db);
 }
 
-static void test_free_cli_db_null() {
-  logger(4, "*** test_free_cli_db_null ***\n");
-  // This should not crash
+static void test_free_cli_db_null_input() {
+  logger(4, "*** test_free_cli_db_null_input ***\n");
+  // Should not crash
   free_cli_db(NULL);
 }
-
-static void test_free_cli_db_null_db() {
-  logger(4, "*** test_free_cli_db_null_db ***\n");
-  cli_db_t *cli_db;
-
-  cli_db = malloc(sizeof(cli_db_t));
-  TEST_ASSERT_NOT_NULL(cli_db);
-  cli_db->db = NULL;
-  strcpy(cli_db->path, "test.db");
-  strcpy(cli_db->id, "testdb");
-  
-  // This should not crash
-  free_cli_db(cli_db);
-}
-
 
 extern void setUp(void) {
   // Reset global state before each test
@@ -1008,54 +1032,40 @@ extern int main() {
   RUN_TEST(test_list_command_valid_with_databases);
   RUN_TEST(test_list_command_null_inputs);
   
-  // // use_command tests
+  // use_command tests
   RUN_TEST(test_use_command_null_inputs);
   RUN_TEST(test_use_command_invalid_inputs);
   
-  // // put_command tests
-  // RUN_TEST(test_put_command_valid_inputs);
-  // RUN_TEST(test_put_command_valid_inputs_without_type);
-  // RUN_TEST(test_put_command_null_cli_db);
-  // RUN_TEST(test_put_command_null_cmd_ptr);
-  // RUN_TEST(test_put_command_both_null);
-  // RUN_TEST(test_put_command_missing_param_1);
-  // RUN_TEST(test_put_command_missing_param_2);
-  // RUN_TEST(test_put_command_empty_params);
+  // put_command tests
+  RUN_TEST(test_put_command_valid_inputs);
+  RUN_TEST(test_put_command_null_inputs);
+  RUN_TEST(test_put_command_invalid_inputs);
   
-  // // get_command tests
-  // RUN_TEST(test_get_command_valid_input);
-  // RUN_TEST(test_get_command_null_cli_db);
-  // RUN_TEST(test_get_command_null_cmd_ptr);
-  // RUN_TEST(test_get_command_both_null);
-  // RUN_TEST(test_get_command_missing_param_1);
-  // RUN_TEST(test_get_command_empty_param_1);
-  // RUN_TEST(test_get_command_nonexistent_key);
+  // get_command tests
+  RUN_TEST(test_get_command_valid_inputs);
+  RUN_TEST(test_get_command_null_inputs);
+  RUN_TEST(test_get_command_invalid_inputs);
   
-  // // delete_command tests
-  // RUN_TEST(test_delete_command_valid_input);
-  // RUN_TEST(test_delete_command_null_cli_db);
-  // RUN_TEST(test_delete_command_null_cmd_ptr);
-  // RUN_TEST(test_delete_command_both_null);
-  // RUN_TEST(test_delete_command_missing_param_1);
-  // RUN_TEST(test_delete_command_empty_param_1);
-  // RUN_TEST(test_delete_command_failed_delete);
+  // delete_command tests
+  RUN_TEST(test_delete_command_valid_inputs);
+  RUN_TEST(test_delete_command_null_inputs);
+  RUN_TEST(test_delete_command_invalid_inputs);
   
   // // print_command tests
-  // RUN_TEST(test_print_command_valid_input);
-  // RUN_TEST(test_print_command_null_cli_db);
+  // RUN_TEST(test_print_command_valid_inputs);
+  // RUN_TEST(test_print_command_null_inputs);
   
   // // help command tests
-  // RUN_TEST(test_main_help_command);
-  // RUN_TEST(test_use_help_command);
+  // RUN_TEST(test_main_help_command_valid);
+  // RUN_TEST(test_use_help_command_valid);
 
   // // free_cli_command tests
   // RUN_TEST(test_free_cli_command_valid);
-  // RUN_TEST(test_free_cli_command_null);
-  
+  // RUN_TEST(test_free_cli_command_null_input);
+
   // // free_cli_db tests
   // RUN_TEST(test_free_cli_db_valid);
-  // RUN_TEST(test_free_cli_db_null);
-  // RUN_TEST(test_free_cli_db_null_db);
-  
+  // RUN_TEST(test_free_cli_db_null_input);
+
   return UNITY_END();
 }
