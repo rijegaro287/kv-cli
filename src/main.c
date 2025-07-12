@@ -4,7 +4,7 @@
 
 #include "hash_table.h"
 
-int main(int argc, char const *argv[]) {
+int main() {
   start_cli();
   return 0;
 }
