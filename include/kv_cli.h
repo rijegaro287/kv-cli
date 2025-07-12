@@ -30,6 +30,8 @@ typedef struct _cli_cmd_t {
 static cli_db_t *db_list[KV_CLI_MAX_OPEN_DATABASES];
 static uint64_t db_count = 0;
 
+extern cli_db_t **get_db_list();
+extern uint64_t get_db_count();
 
 extern int64_t get_command_from_user(uint8_t *msg, uint8_t *dest, uint64_t max_len);
 extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type);
@@ -49,3 +51,4 @@ extern int64_t use_help_command();
 extern void start_cli();
 extern void free_cli_db(cli_db_t *cli_db);
 extern void free_cli_command(cli_cmd_t *cmd_ptr);
+extern void free_db_list();

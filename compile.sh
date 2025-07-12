@@ -4,6 +4,7 @@ cd ./build
 cmake ..
 make
 
-./test_kv_cli
-
 # ctest --rerun-failed --output-on-failure
+
+cd ..
+./build/test_kv_cli

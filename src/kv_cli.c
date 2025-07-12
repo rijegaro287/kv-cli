@@ -1,5 +1,12 @@
 #include "kv_cli.h"
 
+extern cli_db_t **get_db_list() {
+  return db_list;
+}
+
+extern uint64_t get_db_count() {
+  return db_count;
+}
 
 extern int64_t get_command_from_user(uint8_t *msg, uint8_t *dest, uint64_t max_len) {
   uint8_t input_cmd[max_len];
@@ -40,6 +47,11 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
 }
 
 extern cli_cmd_t *create_command(uint8_t *command) {
+  if (command == NULL) {
+    logger(3, "Error: NULL pointer passed to create_command\n");
+    return NULL;
+  }
+  
   cli_cmd_t *cmd_ptr = malloc(sizeof(cli_cmd_t));
   if (cmd_ptr == NULL) {
     logger(3, "Error: Failed to allocate command memory\n");
@@ -184,8 +196,7 @@ extern int64_t load_command(cli_cmd_t *cmd_ptr) {
     return -1;
   }
   
-  db_list[db_count] = cli_db;
-  db_count++;
+  db_list[db_count++] = cli_db;
 
   return 0;
 }
@@ -460,4 +471,14 @@ extern void free_cli_db(cli_db_t* cli_db) {
     free_db(cli_db->db);
   }
   free(cli_db);
+}
+
+extern void free_db_list() {
+  while(db_count > 0) {
+    cli_db_t *cli_db = db_list[db_count-1];
+    if (cli_db != NULL) {
+      free_cli_db(cli_db);
+    }
+    db_count--;
+  }
 }

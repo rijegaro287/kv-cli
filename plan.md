@@ -22,14 +22,19 @@
     * ✓ A Hash Table
     * ✓ A Linked List
 
-  * ✓ Reloads a database using another data structure
-      ✓ reload \<db_id\> \<storage_type\>
-  
   * ✓ List all loaded databases and their path
 
   * ✓ Select a database by its id to operate on it
      * ✓ use <db_id>
        * ✓ Enters another loop that operates on the database
+
+  * ✓ Reloads a database using another data structure
+      ✓ reload \<db_id\> \<storage_type\>
+
+  * Closes a loaded database
+    close \<db_id\>
+  
+
 
   * ✓ Show help - Commands and how to use
 

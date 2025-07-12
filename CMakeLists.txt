@@ -30,6 +30,10 @@ set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/kv_cli.c)
 
 add_executable(kv_cli ${HEADERS} ${SOURCES} src/main.c)
 
+target_compile_definitions(kv_cli PUBLIC
+  KV_CLI_MAX_OPEN_DATABASES=128
+)
+
 target_include_directories(kv_cli PRIVATE include)
 
 target_link_libraries(kv_cli PRIVATE kv_store logger)
@@ -47,6 +51,9 @@ target_compile_definitions(unity PUBLIC
   UNITY_INCLUDE_DOUBLE
   UNITY_DOUBLE_PRECISION=1e-15
 )
+target_compile_definitions(test_kv_cli PUBLIC
+  KV_CLI_MAX_OPEN_DATABASES=2
+)
 
 target_link_libraries(test_kv_cli PRIVATE kv_store logger unity)
 
@@ -55,3 +62,12 @@ enable_testing()
 add_test(NAME test_kv_cli 
          COMMAND test_kv_cli
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}) 
+
+file(COPY "${CMAKE_SOURCE_DIR}/test/data/test_1.db" 
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/data/test_1.db")
+
+file(COPY "${CMAKE_SOURCE_DIR}/test/data/test_2.db"
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/data/test_2.db")
+
+file(COPY "${CMAKE_SOURCE_DIR}/test/data/test_3.db"
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/data/test_3.db")
