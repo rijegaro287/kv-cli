@@ -852,6 +852,8 @@ static void test_delete_command_null_inputs() {
   TEST_ASSERT_EQUAL(1, get_db_count());
   free_cli_command(cmd);
 
+  cli_db = get_db_list()[get_db_count()-1];
+
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "key1");
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
@@ -915,9 +917,10 @@ static void test_print_command_valid_inputs() {
   TEST_ASSERT_EQUAL(1, get_db_count());
   free_cli_command(cmd);
 
+  cli_db = get_db_list()[get_db_count()-1];
+
   TEST_ASSERT_GREATER_OR_EQUAL(0, print_command(cli_db));
 
-  // Add some data and print again
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_PUT, "printkey", "printvalue", STR_TYPE_STR);
   cmd = create_command(command);
@@ -955,13 +958,11 @@ static void test_free_cli_command_valid() {
   cmd = create_command(command);
   TEST_ASSERT_NOT_NULL(cmd);
   
-  // Should not crash
   free_cli_command(cmd);
 }
 
 static void test_free_cli_command_null_input() {
   logger(4, "*** test_free_cli_command_null_input ***\n");
-  // Should not crash
   free_cli_command(NULL);
 }
 
@@ -986,7 +987,6 @@ static void test_free_cli_db_valid() {
 
 static void test_free_cli_db_null_input() {
   logger(4, "*** test_free_cli_db_null_input ***\n");
-  // Should not crash
   free_cli_db(NULL);
 }
 
@@ -1051,21 +1051,21 @@ extern int main() {
   RUN_TEST(test_delete_command_null_inputs);
   RUN_TEST(test_delete_command_invalid_inputs);
   
-  // // print_command tests
-  // RUN_TEST(test_print_command_valid_inputs);
-  // RUN_TEST(test_print_command_null_inputs);
+  // print_command tests
+  RUN_TEST(test_print_command_valid_inputs);
+  RUN_TEST(test_print_command_null_inputs);
   
-  // // help command tests
-  // RUN_TEST(test_main_help_command_valid);
-  // RUN_TEST(test_use_help_command_valid);
+  // help command tests
+  RUN_TEST(test_main_help_command_valid);
+  RUN_TEST(test_use_help_command_valid);
 
-  // // free_cli_command tests
-  // RUN_TEST(test_free_cli_command_valid);
-  // RUN_TEST(test_free_cli_command_null_input);
+  // free_cli_command tests
+  RUN_TEST(test_free_cli_command_valid);
+  RUN_TEST(test_free_cli_command_null_input);
 
-  // // free_cli_db tests
-  // RUN_TEST(test_free_cli_db_valid);
-  // RUN_TEST(test_free_cli_db_null_input);
+  // free_cli_db tests
+  RUN_TEST(test_free_cli_db_valid);
+  RUN_TEST(test_free_cli_db_null_input);
 
   return UNITY_END();
 }
