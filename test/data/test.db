@@ -6,5 +6,5 @@ bool:keybool=false
 int64:key69=420
 int8:key1=12
 int16:key2=134
-int64:key4=11221
+int8:key4=1
 string:key5="Hola 1"

@@ -52,6 +52,7 @@
 
 ### Known Issues
 * There is no way of entering spaces when saving a string
+* put command needs datatype to update value
 
 
 ## Architecture
