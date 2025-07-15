@@ -14,7 +14,6 @@ jobs:
           cd ./build
           cmake ..
           make
-      - uses: actions/checkout@v4
       - name: Test
         run: |
           cd ./build
