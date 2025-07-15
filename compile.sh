@@ -1,3 +1,4 @@
+rm -rf ./build
 mkdir -p ./build
 
 cd ./build
@@ -6,5 +7,4 @@ make
 
 # ctest --rerun-failed --output-on-failure
 
-cd ..
-./build/test_kv_cli
+./test_kv_cli

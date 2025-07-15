@@ -415,6 +415,15 @@ extern int64_t main_help_command() {
   logger(4, "\t\t\tL: linked list\n");
   logger(4, "\t\t\tH: Hash Table\n");
 
+  logger(4, "\t* reload <db_id> <storage_type>: Reloads a database with a different storage type\n");
+  logger(4, "\t\t<db_id>: alias of the database to reload\n");
+  logger(4, "\t\t<storage_type>: new data structure to use for storage\n");
+  logger(4, "\t\t\tL: linked list\n");
+  logger(4, "\t\t\tH: Hash Table\n");
+
+  logger(4, "\t* close <db_id>: Closes a database and removes it from memory\n");
+  logger(4, "\t\t<db_id>: alias of the database to close\n");
+
   logger(4, "\t* use <db_id>: Selects a loaded database to apply operations to\n");
   logger(4, "\t\t<db_id>: alias of the loaded database\n");
 
@@ -439,13 +448,14 @@ extern int64_t use_help_command() {
   logger(4, "\t\t\tfloat\n");
   logger(4, "\t\t\tdouble\n");
   logger(4, "\t\t\tbool\n");
-  logger(4, "\t\t\tstring\n");
 
   logger(4, "\t* get <key>: Prints the value of the entry with the given key\n");
   logger(4, "\t\t<key>: Key that identifies the entry\n");
   
   logger(4, "\t* delete <key>: Deletes an entry with the given key\n");
   logger(4, "\t\t<key>: Key that identifies the entry\n");
+  
+  logger(4, "\t* print: Prints all entries in the current database\n");
   
   logger(4, "\t* exit: Exists to the main menu. Stops operating on the current database\n");
 

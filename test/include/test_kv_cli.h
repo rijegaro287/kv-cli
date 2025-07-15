@@ -9,11 +9,9 @@
 
 static cli_cmd_t* create_and_validate_command(const char* command_format, ...);
 static int64_t load_and_validate_database(const char* path, const char* id, const char* storage_type, int64_t expected_db_count);
-static void test_command_with_result(const char* cmd_format, int64_t expected_result, ...);
+static int64_t validate_failed_load(const char* path, const char* id, const char* storage_type, int64_t expected_db_count);
 static void validate_command_properties(cli_cmd_t *cmd, const char* expected_cmd,
                                         const char* expected_param1, const char* expected_param2, const char* expected_param3);
-static void test_null_input_single_param(int64_t (*test_function)(void*), const char* function_name);
-static void test_null_input_dual_param(int64_t (*test_function)(void*, void*), void* valid_param1, void* valid_param2, const char* function_name);
 static int64_t put_key_value(cli_db_t *cli_db, const char* key, const char* value, const char* type);
 static int64_t get_key_value(cli_db_t *cli_db, const char* key);
 static int64_t delete_key_value(cli_db_t *cli_db, const char* key);
@@ -42,6 +40,7 @@ static void test_list_command_null_inputs();
 static void test_use_command_null_inputs();
 static void test_use_command_invalid_inputs();
 static void test_put_command_valid_inputs();
+static void test_put_command_update_value();
 static void test_put_command_null_inputs();
 static void test_put_command_invalid_inputs();
 static void test_get_command_valid_inputs();

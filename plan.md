@@ -32,10 +32,7 @@
       ✓ reload \<db_id\> \<storage_type\>
 
   * ✓ Closes a loaded database
-    ✓ close \<db_id\>
-  
-
-
+    * ✓ close \<db_id\>
   * ✓ Show help - Commands and how to use
 
 3. ✓ Operate on database (CLI Tool)
@@ -54,8 +51,3 @@
   * ✓ Create an executable for the cli (uses the database controller)
 * ✓ Use unit testing framework
   * ✓ Unit Test: Parser, Controller, CLI
-
-### Known Issues
-* There is no way of entering spaces when saving a string
-* put command needs datatype to update value
-* Update help
