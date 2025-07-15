@@ -1,0 +1,9 @@
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "kv-store"
+
+INPUT           = include README.md
+FILE_PATTERNS   = *.h
+RECURSIVE       = YES
+
+OUTPUT_DIRECTORY = docs
+GENERATE_LATEX = NO
