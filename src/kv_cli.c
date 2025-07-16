@@ -49,6 +49,13 @@ extern cli_db_t *create_cli_db(uint8_t *path, uint8_t *id, uint8_t *storage_type
   }
   
   cli_db_t *cli_db = malloc(sizeof(cli_db_t));
+  if (cli_db == NULL) {
+    logger(3, "Error: Failed to allocate memory for cli_db\n");
+    return NULL;
+  }
+
+  memset(cli_db, 0, sizeof(cli_db_t));
+
   cli_db->db = create_db(storage_type);
   if (cli_db->db == NULL) {
     logger(3, "Error: Failed to create new db\n");
@@ -73,14 +80,22 @@ extern cli_cmd_t *create_command(uint8_t *command) {
   }
   memset(cmd_ptr, 0, sizeof(cli_cmd_t));
 
+  uint8_t *command_copy = strdup(command);
+  if (command_copy == NULL) {
+    logger(3, "Error: Failed to allocate memory for command copy\n");
+    free(cmd_ptr);
+    return NULL;
+  }
+
   uint8_t *cmd, *param_1, *param_2, *param_3;
-  cmd = strtok(command, " ");
+  cmd = strtok(command_copy, " ");
   param_1 = strtok(NULL, " ");
   param_2 = strtok(NULL, " ");
   param_3 = strtok(NULL, "\n");
 
   if (cmd == NULL) {
     logger(3, "Error: Invalid command %s\n", command);
+    free(command_copy);
     free_cli_command(cmd_ptr);
     return NULL;
   }
@@ -105,6 +120,7 @@ extern cli_cmd_t *create_command(uint8_t *command) {
     cmd_ptr->param_3[SM_BUFFER_SIZE - 1] = '\0';
   }
   
+  free(command_copy);
   return cmd_ptr;
 }
 
