@@ -252,6 +252,8 @@ extern int64_t reload_command(cli_cmd_t *cmd_ptr) {
     free_cli_db(cli_db);
     return 0;
   }
+  logger(3, "Error: Database with id \"%s\" not found\n", id);
+  return -1;
 }
 
 extern int64_t close_command(cli_cmd_t *cmd_ptr) {
