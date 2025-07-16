@@ -3,10 +3,11 @@
 static void compact_db_list() {
   uint64_t target_idx = 0;
   for (uint64_t idx = 0; idx < KV_CLI_MAX_OPEN_DATABASES; idx++) {
-    cli_db_t *tmp = db_list[idx];
-    if (tmp != NULL) {
-      db_list[idx] = db_list[target_idx];
-      db_list[target_idx] = tmp;
+    if (db_list[idx] != NULL) {
+      if (idx != target_idx) {
+        db_list[target_idx] = db_list[idx];
+        db_list[idx] = NULL;
+      }
       target_idx++;
     }
   }
