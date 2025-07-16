@@ -4,6 +4,27 @@ A simple CLI program written in C that allows the user to manage file-based data
 
 It serves as an user interface for [kv-store](https://github.com/rijegaro287/kv-store)
 
+## Table of Contents
+- [kv-cli](#kv-cli)
+  - [Table of Contents](#table-of-contents)
+  - [Configuration](#configuration)
+  - [Basic Usage](#basic-usage)
+    - [Database Management Commands](#database-management-commands)
+      - [Loading a database](#loading-a-database)
+      - [Listing loaded databases](#listing-loaded-databases)
+      - [Reloading a database](#reloading-a-database)
+      - [Closing a database](#closing-a-database)
+      - [Exiting the application](#exiting-the-application)
+      - [Using a database](#using-a-database)
+    - [Data Manipulation Commands](#data-manipulation-commands)
+      - [Putting an entry](#putting-an-entry)
+      - [Getting an entry](#getting-an-entry)
+      - [Deleting an entry](#deleting-an-entry)
+      - [Printing all entries](#printing-all-entries)
+      - [Exiting the database session](#exiting-the-database-session)
+  - [API Documentation](#api-documentation)
+  - [Running Tests](#running-tests)
+
 ## Configuration
 Clone this repository and build the project:
 
@@ -214,7 +235,7 @@ Exits to the main menu, stopping operations on the current database.
 ```
 
 ## API Documentation
-Click [here](https://rijegaro287.github.io/kv-cli/files.html) to see a list of available header files and the functions they include.
+Click [here](https://rijegaro287.github.io/kv-cli/dir_d44c64559bbebec7f509842c48db8b23.html) to see a list of available header files and the functions they include.
 
 ## Running Tests
 You can run unit tests by building the project and running ctest:
