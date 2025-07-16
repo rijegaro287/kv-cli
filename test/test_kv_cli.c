@@ -206,6 +206,7 @@ static void test_create_command_invalid_inputs() {
   TEST_ASSERT_EQUAL_STRING("./test/test.db", cmd->param_1);
   TEST_ASSERT_EQUAL_STRING("db1", cmd->param_2);
   TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_LIST, cmd->param_3);
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_LOAD, "invalid", "db1", KV_STORAGE_STRUCTURE_LIST);
@@ -215,6 +216,7 @@ static void test_create_command_invalid_inputs() {
   TEST_ASSERT_EQUAL_STRING("invalid", cmd->param_1);
   TEST_ASSERT_EQUAL_STRING("db1", cmd->param_2);
   TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_LIST, cmd->param_3);
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_LOAD, "./test/test.db", "invalid", KV_STORAGE_STRUCTURE_LIST);
@@ -224,6 +226,7 @@ static void test_create_command_invalid_inputs() {
   TEST_ASSERT_EQUAL_STRING("./test/test.db", cmd->param_1);
   TEST_ASSERT_EQUAL_STRING("invalid", cmd->param_2);
   TEST_ASSERT_EQUAL_STRING(KV_STORAGE_STRUCTURE_LIST, cmd->param_3);
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_LOAD, "./test/test.db", "db1", "invalid");
@@ -399,6 +402,7 @@ static void test_reload_command_invalid_inputs() {
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(-1, reload_command(cmd));
   TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s", 
            CLI_COMMAND_RELOAD, "db1", "");
@@ -406,6 +410,7 @@ static void test_reload_command_invalid_inputs() {
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(-1, reload_command(cmd));
   TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s", 
            CLI_COMMAND_RELOAD, "invalid", KV_STORAGE_STRUCTURE_LIST);
@@ -413,6 +418,7 @@ static void test_reload_command_invalid_inputs() {
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(-1, reload_command(cmd));
   TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s", 
            CLI_COMMAND_RELOAD, "db1", "invalid");
@@ -420,6 +426,7 @@ static void test_reload_command_invalid_inputs() {
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(-1, reload_command(cmd));
   TEST_ASSERT_EQUAL(1, get_db_count());
+  free_cli_command(cmd);
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s", 
            CLI_COMMAND_RELOAD, "invalid", "invalid");
@@ -427,8 +434,8 @@ static void test_reload_command_invalid_inputs() {
   TEST_ASSERT_NOT_NULL(cmd);
   TEST_ASSERT_GREATER_OR_EQUAL(-1, reload_command(cmd));
   TEST_ASSERT_EQUAL(1, get_db_count());
-  
   free_cli_command(cmd);
+
   free_db_list();
 }
 
@@ -550,6 +557,7 @@ static void test_put_command_null_inputs() {
   uint8_t command[BG_BUFFER_SIZE];
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
+  cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s", 
            CLI_COMMAND_PUT, "key1", "31", INT32_TYPE_STR);
@@ -571,6 +579,7 @@ static void test_put_command_invalid_inputs() {
   uint8_t command[BG_BUFFER_SIZE];
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
+  cli_db = get_db_list()[get_db_count()-1];  // Add this line to properly initialize cli_db
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s %s %s",
            CLI_COMMAND_PUT, "", "12", INT32_TYPE_STR);
@@ -629,6 +638,7 @@ static void test_get_command_null_inputs() {
   uint8_t command[BG_BUFFER_SIZE];
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
+  cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_GET, "key1");
   cmd = create_command(command);
@@ -648,6 +658,7 @@ static void test_get_command_invalid_inputs() {
   uint8_t command[BG_BUFFER_SIZE];
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
+  cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s", CLI_COMMAND_GET);
   cmd = create_command(command);
@@ -690,7 +701,6 @@ static void test_delete_command_null_inputs() {
   uint8_t command[BG_BUFFER_SIZE];
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
-
   cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s %s", CLI_COMMAND_DELETE, "key1");
@@ -712,7 +722,6 @@ static void test_delete_command_invalid_inputs() {
   uint8_t command[BG_BUFFER_SIZE];
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
-
   cli_db = get_db_list()[get_db_count()-1];
 
   snprintf(command, BG_BUFFER_SIZE, "%s", CLI_COMMAND_DELETE);
@@ -789,7 +798,6 @@ static void test_free_cli_db_valid() {
   cli_db_t *cli_db;
 
   load_and_validate_database("./test/data/test_1.db", "db1", KV_STORAGE_STRUCTURE_LIST, 1);
-
   cli_db = get_db_list()[get_db_count()-1];
 
   free_db_list();

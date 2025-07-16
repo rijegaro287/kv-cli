@@ -71,3 +71,7 @@ file(COPY "${CMAKE_SOURCE_DIR}/test/data/test_2.db"
 
 file(COPY "${CMAKE_SOURCE_DIR}/test/data/test_3.db"
      DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/test/data/test_3.db")
+
+target_compile_options(test_kv_cli PRIVATE -fsanitize=address)
+target_link_options(test_kv_cli PRIVATE -fsanitize=address)
+  
