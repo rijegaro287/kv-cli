@@ -116,7 +116,7 @@ extern int64_t start_use(uint64_t db_idx) {
   
   int64_t cmd_result = -1;
   while (true) {
-    logger(4, "-----------------------------------------------\n");
+    logger(4, "--------------------------------------------------\n");
     get_command_from_user(msg, command, BG_BUFFER_SIZE);
     cmd_ptr = create_command(command);
     if (cmd_ptr ==  NULL) {
@@ -465,7 +465,7 @@ extern int64_t use_help_command() {
 extern void start_cli() {
   int64_t cmd_result = -1;
   while (true) {
-    logger(4, "===============================================\n");
+    logger(4, "==================================================\n");
     cli_cmd_t *cmd_ptr;
     uint8_t command[BG_BUFFER_SIZE];
 
