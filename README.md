@@ -216,7 +216,6 @@ Exits to the main menu, stopping operations on the current database.
 ## API Documentation
 Click [here](https://rijegaro287.github.io/kv-cli/files.html) to see a list of available header files and the functions they include.
 
-
 ## Running Tests
 You can run unit tests by building the project and running ctest:
 
